@@ -12,3 +12,4 @@ __pycache__/
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/settings.json
+bin/Cloudino_d1_mini_old_v2.bin
