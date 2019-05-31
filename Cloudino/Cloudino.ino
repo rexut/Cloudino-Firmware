@@ -11,7 +11,6 @@
 
 //#include <ArduinoJson.h>
 #include "src/CloudinoConf.h"
-#include "src/EEPROMAnything.h"
 
 #ifdef CDINO_ARDUINO 
 #ifdef CDINO_UPLOADER

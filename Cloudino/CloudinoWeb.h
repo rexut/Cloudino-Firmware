@@ -19,6 +19,8 @@
 #include <WiFiUdp.h>
 WiFiUDP udp;
 
+#include "src/EEPROMAnything.h"
+
 extern "C" {
 //#include "c_types.h"
 //#include "ets_sys.h"
@@ -1228,4 +1230,3 @@ void initWebServer()
 }
 
 #endif
-

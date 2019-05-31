@@ -7,8 +7,10 @@
 #ifndef CLOUDINOCONNECTOR_H
 #define CLOUDINOCONNECTOR_H
 
-#include "CloudinoUploader.h"
 #include <WiFiClientSecure.h>
+
+#include "CloudinoUploader.h"
+#include "src/EEPROMAnything.h"
 
 #define ARDUINO_FIRMWARE_PATH "/update.bin"
 
