@@ -40,6 +40,8 @@
 RCSwitch *rcswitch = NULL;
 #endif
 
+#include "src/CloudinoConf.h"
+
 #define NPOS -1
 
 void addDefaulFunct(UsrData *data);
@@ -1017,4 +1019,3 @@ void registerFunctions(CTinyJS *js, Timer *timer) {
 #endif  
   addDefaulFunct(data);
 }
-

@@ -4,8 +4,10 @@
   Released into the public domain.
 */
 
-#ifndef CLOUDINO_CONF_H
-#define CLOUDINO_CONF_H
+#ifndef CloudinoConf_h
+#define CloudinoConf_h
+
+#include <Arduino.h>  // for type definitions
 
 #define CDINO_VERSION F("0.9.15")
 
@@ -34,7 +36,7 @@
 
 struct config_t
 {
-  char ini[4]="ini";
+  char ini[4] = "ini";
   char auth_user[21];
   char auth_passwd[21];  
   char mdns_dns[16];
@@ -75,4 +77,6 @@ struct config_t
 #endif
 };
 
-#endif
+extern config_t configuration;
+
+#endif  // CloudinoConf_h

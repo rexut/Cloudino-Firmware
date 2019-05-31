@@ -3,13 +3,13 @@
   Created by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com, July 8, 2015
   Released into the public domain.
 */
-#include <Arduino.h>
+
+#include <Arduino.h>  // for type definitions
+
 #include "WiFiServer.h"
 #include "WiFiClient.h"
 #include "CloudinoUploader.h"
-#include "CloudinoConf.h"
-
-extern config_t configuration;
+#include "src/CloudinoConf.h"
 
 void CloudinoUploader::begin()
 {
@@ -83,4 +83,3 @@ void CloudinoUploader::handleClient()
     }
 #endif    
 }
-

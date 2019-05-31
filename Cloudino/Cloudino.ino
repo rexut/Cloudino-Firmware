@@ -10,8 +10,7 @@
 #include <FS.h>       // TODO: remove when SPIFFS object is seperated
 
 //#include <ArduinoJson.h>
-#include "CloudinoConf.h"
-config_t configuration; 
+#include "src/CloudinoConf.h"
 #include "src/EEPROMAnything.h"
 
 #ifdef CDINO_ARDUINO 

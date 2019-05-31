@@ -5,12 +5,11 @@
 */
 
 #include "SMessageProc.h"
+#include "src/CloudinoConf.h"
 
 //|L|17|hola %d, JAVIER10
 //|M5|helloS6|mundo!
 //|M3|ledS2|on
-
-extern config_t configuration;
 
 void MessageProc::handleMessages()
 {

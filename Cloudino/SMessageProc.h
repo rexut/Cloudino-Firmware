@@ -4,11 +4,10 @@
   Released into the public domain.
 */
 
-#ifndef MessageProc_h
-#define MessageProc_h
+#ifndef SMessageProc_h
+#define SMessageProc_h
 
-#include <Arduino.h>
-#include "CloudinoConf.h"
+#include <Arduino.h>  // for type definitions
 
 const char SEP='|';
 const char MSEP='M';
@@ -45,4 +44,4 @@ class MessageProc
     boolean waitStream(Stream &stream);
 };
 
-#endif
+#endif  // SMessageProc_h
