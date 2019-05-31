@@ -3,11 +3,12 @@
   Created by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com, July 8, 2015
   Released into the public domain.
 */
-#include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPClient.h>
-#include <FS.h>
+
+#include <FS.h>       // TODO: remove when SPIFFS object is seperated
+
 //#include <ArduinoJson.h>
 #include "CloudinoConf.h"
 config_t configuration; 

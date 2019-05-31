@@ -4,68 +4,18 @@
   Released into the public domain.
 */
 
+#ifndef EEPROMAnything_h
+#define EEPROMAnything_h
+
 #include <Arduino.h>  // for type definitions
 
-template <class T> int EEPROM_clean(int ee, const T& value)
-{
-    int s=sizeof(value);
-    EEPROM.begin(s+ee);
-    unsigned int i;
-    for (i = 0; i < s; i++)
-          EEPROM.write(ee++, 0);
-    EEPROM.commit();
-    EEPROM.end();
-    return i;
-}
+template <class T> int EEPROM_clean(int ee, const T& value);
+template <class T> int EEPROM_write(int ee, const T& value, int ext = 0);
+template <class T> int EEPROM_read(int ee, T& value);
 
-template <class T> int EEPROM_write(int ee, const T& value, int ext=0)
-{
-    EEPROM.begin(sizeof(value)+ee+ext);
-    const byte* p = (const byte*)(const void*)&value;
-    unsigned int i;
+String fileWrite(String name, String content);
+String fileRead(String name);
 
-    //Serial.print("ee:"+String(ee)+" "+String(sizeof(value)));
-    
-    for (i = 0; i < sizeof(value); i++)
-          EEPROM.write(ee++, *p++);
-    EEPROM.commit();
-    EEPROM.end();
-    return i;
-}
+#include "EEPROMAnythingImpl.h"
 
-template <class T> int EEPROM_read(int ee, T& value)
-{
-    EEPROM.begin(sizeof(value)+ee);
-    byte* p = (byte*)(void*)&value;
-    unsigned int i;
-    for (i = 0; i < sizeof(value); i++)
-          *p++ = EEPROM.read(ee++);
-    EEPROM.end();   
-    return i;
-}
-
-String fileWrite(String name, String content)
-{
-    File file = SPIFFS.open(name, "w");
-    if(file)file.print(content);
-    if(file)file.close();  
-}
-
-String fileRead(String name){
-  //read file from SPIFFS and store it as a String variable
-  File file = SPIFFS.open(name.c_str(), "r");
-  if (!file) {
-    return "";
-  }
-  else {    
-    int fileSize = file.size();
-    char buf[fileSize+1];
-    file.read((uint8_t *)buf, fileSize);
-    file.close();
-    buf[fileSize]=0;
-    return String(buf);
-  }
-  
-}
-
-
+#endif  // EEPROMAnything_h
