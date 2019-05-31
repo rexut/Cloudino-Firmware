@@ -7,6 +7,8 @@
 #ifndef MQTTCONNECTOR_H
 #define MQTTCONNECTOR_H
 
+#include "src/CloudinoConf.h"
+
 MessageProc *__proc;
 
 class MQTTConnector : public CloudConnector

@@ -7,6 +7,8 @@
 #ifndef CLOUDCONNECTOR_H
 #define CLOUDCONNECTOR_H
 
+#include "src/CloudinoConf.h"
+
 class CloudConnector
 {
 public:

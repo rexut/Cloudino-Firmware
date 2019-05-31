@@ -9,6 +9,8 @@
 
 #include <BlynkSimpleEsp8266.h>
 
+#include "src/CloudinoConf.h"
+
 // This is called for all virtual pins, that don't have BLYNK_WRITE handler
 BLYNK_WRITE_DEFAULT() {
   String tp="V"+String(request.pin);

@@ -11,6 +11,7 @@
 
 #include "CloudinoUploader.h"
 #include "src/EEPROMAnything.h"
+#include "src/CloudinoConf.h"
 
 #define ARDUINO_FIRMWARE_PATH "/update.bin"
 

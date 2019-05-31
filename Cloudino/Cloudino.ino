@@ -10,7 +10,7 @@
 #include <FS.h>       // TODO: remove when SPIFFS object is seperated
 
 //#include <ArduinoJson.h>
-#include "src/CloudinoConf.h"
+#include "src/CloudinoConf.h" // TODO: remove when js and timer objetcs are seperated
 
 #ifdef CDINO_ARDUINO 
 #ifdef CDINO_UPLOADER

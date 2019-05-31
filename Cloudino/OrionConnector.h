@@ -7,6 +7,8 @@
 #ifndef ORIONCONNECTOR_H
 #define ORIONCONNECTOR_H
 
+#include "src/CloudinoConf.h"
+
 /*
 POST /ngsi10/contextEntities/urn:infotec:test:t0001 HTTP/1.1
 Host: orion.lab.fi-ware.org:1026
