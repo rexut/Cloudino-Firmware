@@ -31,7 +31,7 @@
     "require_upload_port": true,
     "resetmethod": "nodemcu",
     "protocol": "esptool",
-    "speed": 921600
+    "speed": 460800
   },
   "url": "http://web.archive.org/web/20160922012907/http://www.wemos.cc/Products/d1_mini.html",
   "vendor": "WEMOS"
