@@ -12,7 +12,7 @@
 //#include <ArduinoJson.h>
 #include "CloudinoConf.h"
 config_t configuration; 
-#include "EEPROMAnything.h"
+#include "src/EEPROMAnything.h"
 
 #ifdef CDINO_ARDUINO 
 #ifdef CDINO_UPLOADER
