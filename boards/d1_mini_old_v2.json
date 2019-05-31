@@ -1,0 +1,38 @@
+{
+  "platform": "espressif8266",
+  "build": {
+    "core": "esp8266",
+    "extra_flags": "-DESP8266 -DARDUINO_ARCH_ESP8266 -DARDUINO_ESP8266_WEMOS_D1MINI",
+    "f_cpu": "80000000L",
+    "f_flash": "40000000L",
+    "flash_mode": "dio",
+    "hwids": [
+      [
+        "0x1A86",
+        "0x7523"
+      ]
+    ],
+    "ldscript": "eagle.flash.4m1m.ld",
+    "mcu": "esp8266",
+    "variant": "d1_mini"
+  },
+  "connectivity": [
+    "wifi"
+  ],
+  "frameworks": [
+    "arduino",
+    "esp8266-rtos-sdk",
+    "esp8266-nonos-sdk"
+  ],
+  "name": "WeMos D1 R2 and old mini V2 (ESP-12F Module)",
+  "upload": {
+    "maximum_ram_size": 81920,
+    "maximum_size": 4194304,
+    "require_upload_port": true,
+    "resetmethod": "nodemcu",
+    "protocol": "esptool",
+    "speed": 921600
+  },
+  "url": "http://web.archive.org/web/20160922012907/http://www.wemos.cc/Products/d1_mini.html",
+  "vendor": "WEMOS"
+}
