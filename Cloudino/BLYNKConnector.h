@@ -109,7 +109,7 @@ public:
     }
   }
 
-  void onLog(String log)
+  void onLog(String log __attribute__((unused)))
   {
     
   }
