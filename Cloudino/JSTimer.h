@@ -26,8 +26,8 @@ public:
       int id;
       unsigned long ltime=0;
       unsigned long time=0;
-      int n;
       timer_callback fn;
+      int n;
       timer_callback fn2;
       TimerInstance *next=NULL;;
     };    
