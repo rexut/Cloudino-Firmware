@@ -131,7 +131,7 @@ void onLocalPostMessage(String topic,String message)
 }
 #endif
 
-#include "CloudinoWeb.h"
+#include "src/CloudinoWeb.h"
 
 void onMessage(String topic,String message)
 {
