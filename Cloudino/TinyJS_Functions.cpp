@@ -48,17 +48,17 @@ void addDefaulFunct(UsrData *data);
 void registerFunctions(CTinyJS *js, Timer *timer);
 void js_reset(CScriptVar *v, void *userdata);
 
-void js_print(CScriptVar *v, void *userdata) {
+void js_print(CScriptVar *v, void *userdata __attribute__((unused))) {
   TRACE(v->getParameter("text")->getString());
 }
 
-void js_dump(CScriptVar *v, void *userdata) {
+void js_dump(CScriptVar *v __attribute__((unused)), void *userdata) {
     CTinyJS *js = (CTinyJS*)userdata;
     TRACE("FreeHeap:"+String(ESP.getFreeHeap()));
     js->root->trace(">  ");
 }
 
-void js_restart(CScriptVar *v, void *userdata) {
+void js_restart(CScriptVar *v __attribute__((unused)), void *userdata __attribute__((unused))) {
   ESP.restart();
 }
 
@@ -122,25 +122,25 @@ void js_scCloudinoDump(CScriptVar *v, void *userdata)
 */
 #endif
 
-void js_pinMode(CScriptVar *v, void *userdata) {
+void js_pinMode(CScriptVar *v, void *userdata __attribute__((unused))) {
   pinMode(v->getParameter("pin")->getInt(), v->getParameter("mode")->getInt());
 }
 
-void js_digitalWrite(CScriptVar *v, void *userdata) {
+void js_digitalWrite(CScriptVar *v, void *userdata __attribute__((unused))) {
   digitalWrite(v->getParameter("pin")->getInt(), v->getParameter("value")->getInt());
 }
 
-void js_digitalRead(CScriptVar *v, void *userdata) {
+void js_digitalRead(CScriptVar *v, void *userdata __attribute__((unused))) {
   int value=digitalRead(v->getParameter("pin")->getInt());
   v->getReturnVar()->setInt(value);  
 }
 
-void js_analogRead(CScriptVar *v, void *userdata) {
+void js_analogRead(CScriptVar *v, void *userdata __attribute__((unused))) {
   int value=analogRead(A0);
   v->getReturnVar()->setInt(value);
 }
 
-void js_analogWrite(CScriptVar *v, void *userdata) {
+void js_analogWrite(CScriptVar *v, void *userdata __attribute__((unused))) {
   analogWrite(v->getParameter("pin")->getInt(), v->getParameter("value")->getInt());
 }
 
@@ -165,7 +165,7 @@ void js_setTimeout(CScriptVar *v, void *userdata)
 }
 
 // ----------------------------------------------- Actual Functions
-void scTrace(CScriptVar *c, void *userdata) {
+void scTrace(CScriptVar *c __attribute__((unused)), void *userdata) {
     CTinyJS *js = (CTinyJS*)userdata;
     js->root->trace();
 }
@@ -342,7 +342,7 @@ void addStringChild(CScriptVar *ret, String name, String val)
 #define DHTLIB_ERROR_TIMEOUT  -2
 
 void scDHT11Read(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
     int pin = c->getParameter("pin")->getInt();
     CScriptVar *ret=c->getReturnVar();
 
@@ -433,7 +433,7 @@ void scDHT11Read(CScriptVar *c, void *data) {
 }
 
 void scHCSR04Read(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
     int tpin = c->getParameter("tpin")->getInt();
     int hpin = c->getParameter("hpin")->getInt();
 
@@ -457,7 +457,7 @@ void scHCSR04Read(CScriptVar *c, void *data) {
 #ifdef RCSWITCH_SUPPORT
 
 void scRCSwitchEnableTransmit(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
     //protocol,pin,pulseLength,repeat    
     int protocol = c->getParameter("protocol")->getInt();
     int pin = c->getParameter("pin")->getInt();
@@ -472,7 +472,7 @@ void scRCSwitchEnableTransmit(CScriptVar *c, void *data) {
 }
 
 void scRCSwitchEnableReceive(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
     //pin    
     int pin = c->getParameter("pin")->getInt();
     if(rcswitch==NULL)rcswitch=new RCSwitch();
@@ -482,7 +482,7 @@ void scRCSwitchEnableReceive(CScriptVar *c, void *data) {
 }
 
 void scRCSwitchSend(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
     //protocol,tpin,rpin,pulseLength,repeat    
     String code = c->getParameter("code")->getString();
     if(rcswitch)
@@ -517,7 +517,7 @@ static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength){
 }
 
 void scRCSwitchReceive(CScriptVar *c, void *data) {
-    CTinyJS *tinyJS = (CTinyJS *)data;
+    CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
 
     if(rcswitch)
     {                    
@@ -565,7 +565,7 @@ void scHTTPSSend(CScriptVar *c, void *data) {
 }
 #endif
 
-void scHTTPSend(CScriptVar *c, void *data) {
+void scHTTPSend(CScriptVar *c, void *data __attribute__((unused))) {
   String host = c->getParameter("host")->getString();
   int port = c->getParameter("port")->getInt();
   String content = c->getParameter("content")->getString();
@@ -589,7 +589,7 @@ void scHTTPSend(CScriptVar *c, void *data) {
   }
 }
 
-void scHTTPURL(CScriptVar *c, void *data) 
+void scHTTPURL(CScriptVar *c, void *data __attribute__((unused))) 
 {
     String url = c->getParameter("url")->getString();
   
@@ -606,7 +606,7 @@ void scHTTPURL(CScriptVar *c, void *data)
     http.end();      
 }
 
-void scArrayContains(CScriptVar *c, void *data) {
+void scArrayContains(CScriptVar *c, void *data __attribute__((unused))) {
   CScriptVar *obj = c->getParameter("obj");
   CScriptVarLink *v = c->getParameter("this")->firstChild;
 
@@ -622,7 +622,7 @@ void scArrayContains(CScriptVar *c, void *data) {
   c->getReturnVar()->setInt(contains);
 }
 
-void scArrayRemove(CScriptVar *c, void *data) {
+void scArrayRemove(CScriptVar *c, void *data __attribute__((unused))) {
   CScriptVar *obj = c->getParameter("obj");
   Vector<int> removedIndices;
   CScriptVarLink *v;
@@ -648,7 +648,7 @@ void scArrayRemove(CScriptVar *c, void *data) {
   }
 }
 
-void scArrayJoin(CScriptVar *c, void *data) {
+void scArrayJoin(CScriptVar *c, void *data __attribute__((unused))) {
   String sep = c->getParameter("separator")->getString();
   CScriptVar *arr = c->getParameter("this");
 
@@ -682,7 +682,7 @@ void scArrayJoin(CScriptVar *c, void *data) {
 #define scReturnDouble(a)   ( c->getReturnVar()->setDouble(a) )  
 
 //Math.abs(x) - returns absolute of given value
-void scMathAbs(CScriptVar *c, void *userdata) {
+void scMathAbs(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( scIsInt("a") ) {
       scReturnInt( F_ABS( scGetInt("a") ) );
     } else if ( scIsDouble("a") ) {
@@ -691,7 +691,7 @@ void scMathAbs(CScriptVar *c, void *userdata) {
 }
 
 //Math.round(a) - returns nearest round of given value
-void scMathRound(CScriptVar *c, void *userdata) {
+void scMathRound(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( scIsInt("a") ) {
       scReturnInt( F_ROUND( scGetInt("a") ) );
     } else if ( scIsDouble("a") ) {
@@ -700,7 +700,7 @@ void scMathRound(CScriptVar *c, void *userdata) {
 }
 
 //Math.min(a,b) - returns minimum of two given values 
-void scMathMin(CScriptVar *c, void *userdata) {
+void scMathMin(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( (scIsInt("a")) && (scIsInt("b")) ) {
       scReturnInt( F_MIN( scGetInt("a"), scGetInt("b") ) );
     } else {
@@ -709,7 +709,7 @@ void scMathMin(CScriptVar *c, void *userdata) {
 }
 
 //Math.max(a,b) - returns maximum of two given values  
-void scMathMax(CScriptVar *c, void *userdata) {
+void scMathMax(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( (scIsInt("a")) && (scIsInt("b")) ) {
       scReturnInt( F_MAX( scGetInt("a"), scGetInt("b") ) );
     } else {
@@ -739,7 +739,7 @@ void scMathSign(CScriptVar *c, void *userdata) {
 
 
 //Math.PI() - returns PI value
-void scMathPI(CScriptVar *c, void *userdata) {
+void scMathPI(CScriptVar *c, void *userdata __attribute__((unused))) {
     scReturnDouble(k_PI);
 }
 
@@ -842,7 +842,7 @@ void scMathPow(CScriptVar *c, void *userdata) {
 }
 */
 //Math.sqrt(a) - returns square root of given value
-void scMathSqrt(CScriptVar *c, void *userdata) {
+void scMathSqrt(CScriptVar *c, void *userdata __attribute__((unused))) {
     scReturnDouble( sqrtf( scGetDouble("a") ) );
 }
 //REQUIRE
@@ -987,7 +987,7 @@ void addDefaulFunct(UsrData *data)
   js->addNative(F("function require(name)"), js_require, data); 
 }
 
-void js_reset(CScriptVar *v, void *userdata) {
+void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
   UsrData *data=(UsrData*)userdata;
   CTinyJS *js = data->js;
   Timer *timer=data->timer;

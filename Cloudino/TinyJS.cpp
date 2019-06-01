@@ -1398,7 +1398,7 @@ CScriptVarLink *CTinyJS::functionCall(bool &execute, CScriptVarLink *function, C
         /* we just want to execute the block, but something could
          * have messed up and left us with the wrong ScriptLex, so
          * we want to be careful here... */
-        CScriptException *exception = 0;
+        //CScriptException *exception = 0;
         CScriptLex *oldLex = l;
         CScriptLex *newLex = new CScriptLex(function->var->getString());
         l = newLex;
