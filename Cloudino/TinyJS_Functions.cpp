@@ -735,7 +735,7 @@ void scMathSign(CScriptVar *c, void *userdata) {
       scReturnDouble( F_SGN( scGetDouble("a") ) );
     }
 }
-//*/
+*/
 
 
 //Math.PI() - returns PI value
@@ -819,7 +819,7 @@ void scMathATanh(CScriptVar *c, void *userdata) {
 void scMathE(CScriptVar *c, void *userdata) {
     scReturnDouble(k_E);
 }
-/*
+
 //Math.log(a) - returns natural logaritm (base E) of given value
 void scMathLog(CScriptVar *c, void *userdata) {
     scReturnDouble( log( scGetDouble("a") ) );
@@ -835,8 +835,7 @@ void scMathLog10(CScriptVar *c, void *userdata) {
 void scMathExp(CScriptVar *c, void *userdata) {
     scReturnDouble( exp( scGetDouble("a") ) );
 }
-*/
-/*
+
 //Math.pow(a,b) - returns the result of a number raised to a power (a)^(b)
 void scMathPow(CScriptVar *c, void *userdata) {
     scReturnDouble( pow( scGetDouble("a"), scGetDouble("b") ) );
