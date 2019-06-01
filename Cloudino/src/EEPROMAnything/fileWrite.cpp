@@ -18,4 +18,6 @@ String fileWrite(String name, String content)
     file.close();
 
   }
+
+  return fileRead(name);
 }
