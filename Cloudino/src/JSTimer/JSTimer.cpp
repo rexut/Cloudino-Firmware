@@ -4,7 +4,7 @@
   Released into the public domain.
 */
 
-#include "JSTimer.h"
+#include "../JSTimer.h"
 
 JSTimer::JSTimer(){
 }

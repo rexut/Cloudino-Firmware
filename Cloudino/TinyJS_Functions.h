@@ -33,7 +33,7 @@
 #define TINYJS_FUNCTIONS_H
 
 #include "TinyJS.h"
-#include "JSTimer.h"
+#include "src/JSTimer.h"
 #ifdef CDINOJS
 #include "src/SMessageProc.h"
 #endif

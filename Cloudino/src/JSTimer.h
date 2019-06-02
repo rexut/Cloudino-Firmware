@@ -4,8 +4,8 @@
   Released into the public domain.
 */
 
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef JSTimer_h
+#define JSTimer_h
 
 #include <Arduino.h> 
 
@@ -96,4 +96,4 @@ protected:
     }    
 };
 
-#endif
+#endif  // JSTimer_h
