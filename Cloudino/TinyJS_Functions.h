@@ -35,7 +35,7 @@
 #include "TinyJS.h"
 #include "JSTimer.h"
 #ifdef CDINOJS
-#include "SMessageProc.h"
+#include "src/SMessageProc.h"
 #endif
 
 struct UsrData

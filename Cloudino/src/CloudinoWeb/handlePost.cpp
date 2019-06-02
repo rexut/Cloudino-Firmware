@@ -7,9 +7,7 @@
 #include <Arduino.h>  // for type definitions
 
 #include "../CloudinoWeb.h"
-
-#include "../../SMessageProc.h"
-extern SMessageProc proc;
+#include "../SMessageProc.h"
 
 void handlePost()
 {

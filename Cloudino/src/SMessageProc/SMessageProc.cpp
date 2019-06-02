@@ -4,11 +4,11 @@
   Released into the public domain.
 */
 
-#include "SMessageProc.h"
-#include "src/CloudinoConf.h"
+#include "../CloudinoConf.h"
+#include "../SMessageProc.h"
 
-//|L|17|hola %d, JAVIER10
-//|M5|helloS6|mundo!
+//|L|17|hello %d, XAVIER10
+//|M5|helloS6|world!
 //|M3|ledS2|on
 
 void SMessageProc::handleMessages()
@@ -168,3 +168,5 @@ void SMessageProc::processLocalMessage(String topic, String msg)
 void SMessageProc::clear()
 {
 }
+
+SMessageProc proc;

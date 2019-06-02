@@ -8,7 +8,7 @@
 #define CLOUDCONNECTOR_H
 
 #include "src/CloudinoConf.h"
-#include "SMessageProc.h"
+#include "src/SMessageProc.h"
 
 class CloudConnector
 {

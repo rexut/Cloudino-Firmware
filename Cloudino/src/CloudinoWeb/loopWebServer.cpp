@@ -8,12 +8,10 @@
 
 #include "../EEPROMAnything.h"
 #include "../CloudinoWeb.h"
+#include "../SMessageProc.h"
 
 #include "../../TinyJS.h"
 extern CTinyJS *js;
-
-#include "../../SMessageProc.h"
-extern SMessageProc proc;
 
 MDNSResponder mdns;
 

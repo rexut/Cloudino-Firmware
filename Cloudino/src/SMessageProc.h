@@ -44,4 +44,6 @@ class SMessageProc
     boolean waitStream(Stream &stream);
 };
 
+extern SMessageProc proc;
+
 #endif  // SMessageProc_h

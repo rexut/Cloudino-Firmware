@@ -39,7 +39,7 @@
 #endif
 
 #ifdef CDINOJS
-#include "SMessageProc.h"
+#include "src/SMessageProc.h"
 #include <WiFiUdp.h>
 #endif
 
@@ -494,7 +494,6 @@ private:
 };
 
 #ifdef CDINOJS
-extern SMessageProc proc;
 extern WiFiUDP udp;
 #endif
 

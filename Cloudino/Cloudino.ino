@@ -11,15 +11,13 @@
 
 //#include <ArduinoJson.h>
 #include "src/CloudinoConf.h" // TODO: remove when js and timer objetcs are seperated
+#include "src/SMessageProc.h"
 
 #ifdef CDINO_ARDUINO 
 #ifdef CDINO_UPLOADER
 #include "CloudinoUploader.h"
 #endif
 #endif
-
-#include "SMessageProc.h"
-SMessageProc proc;
 
 #ifdef JS_SUPPORT
 #include "TinyJS.h"
