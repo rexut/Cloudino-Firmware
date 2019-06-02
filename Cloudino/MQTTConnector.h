@@ -45,7 +45,7 @@ public:
       client.setCallback([](char* topic, uint8_t* payload, unsigned int length) {
         String tp=String(topic);
         char data[length+1];
-        for(int i=0;i<length;i++)data[i]=payload[i];
+        for(unsigned int i=0;i<length;i++)data[i]=payload[i];
         tp=tp.substring(tp.lastIndexOf("/")+1);
         __proc->post(tp,data);
       });
