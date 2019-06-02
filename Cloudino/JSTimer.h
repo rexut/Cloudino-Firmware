@@ -1,5 +1,5 @@
 /*
-  Timer.h - Library for Cloudino Platform.
+  JSTimer.h - Library for Cloudino Platform.
   Created by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com, July 8, 2015
   Released into the public domain.
 */
@@ -9,10 +9,10 @@
 
 #include <Arduino.h> 
 
-class Timer {
+class JSTimer {
 public:
     // constructor
-    Timer();
+    JSTimer();
 
     typedef String timer_callback;
     typedef void (*timer_global_callback)(timer_callback);

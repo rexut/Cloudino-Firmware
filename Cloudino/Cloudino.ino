@@ -26,7 +26,7 @@ MessageProc proc;
 #include "TinyJS_Functions.h"
 #include "JSTimer.h"
 CTinyJS *js = new CTinyJS();
-Timer *timer= new Timer();
+JSTimer *timer= new JSTimer();
 #endif
 
 #include "CloudConnector.h"

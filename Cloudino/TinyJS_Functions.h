@@ -41,7 +41,7 @@
 struct UsrData
 {
   CTinyJS *js;
-  Timer *timer;
+  JSTimer *timer;
 #ifdef CDINOJS  
   MessageProc *proc;
 #endif  
@@ -49,10 +49,10 @@ struct UsrData
 
 /// Register useful functions with the TinyJS interpreter
 #ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, Timer *timer, MessageProc *proc);
+extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, MessageProc *proc);
 #endif
 #ifndef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, Timer *timer);
+extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
 #endif
 
 #endif

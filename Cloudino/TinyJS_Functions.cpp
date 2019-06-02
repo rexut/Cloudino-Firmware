@@ -45,7 +45,6 @@ RCSwitch *rcswitch = NULL;
 #define NPOS -1
 
 void addDefaulFunct(UsrData *data);
-void registerFunctions(CTinyJS *js, Timer *timer);
 void js_reset(CScriptVar *v, void *userdata);
 
 void js_print(CScriptVar *v, void *userdata __attribute__((unused))) {
@@ -146,20 +145,20 @@ void js_analogWrite(CScriptVar *v, void *userdata __attribute__((unused))) {
 
 void js_setInterval(CScriptVar *v, void *userdata)
 {
-    Timer *timer = (Timer*)userdata;
+    JSTimer *timer = (JSTimer*)userdata;
     int ret=timer->setInterval(v->getParameter("time_ms")->getLong(),v->getParameter("funct")->getString());
     v->getReturnVar()->setInt(ret);
 }
 
 void js_clearTimer(CScriptVar *v, void *userdata)
 {
-    Timer *timer = (Timer*)userdata;
+    JSTimer *timer = (JSTimer*)userdata;
     timer->deleteTimer(v->getParameter("id")->getInt());
 }
 
 void js_setTimeout(CScriptVar *v, void *userdata)
 {
-    Timer *timer = (Timer*)userdata;
+    JSTimer *timer = (JSTimer*)userdata;
     int ret=timer->setTimeout(v->getParameter("time_ms")->getLong(),v->getParameter("funct")->getString());
     v->getReturnVar()->setInt(ret);
 }
@@ -850,7 +849,7 @@ void scMathSqrt(CScriptVar *c, void *userdata __attribute__((unused))) {
 void js_require(CScriptVar *v, void *userdata) {
   UsrData *data = (UsrData*)userdata;
   CTinyJS *js=data->js;
-  Timer *timer=data->timer;
+  JSTimer *timer=data->timer;
 #ifdef CDINOJS  
   MessageProc *proc=data->proc;
 #endif
@@ -971,7 +970,7 @@ void js_require(CScriptVar *v, void *userdata) {
 void addDefaulFunct(UsrData *data) 
 {
   CTinyJS *js=data->js;
-  //Timer *timer=data->timer;
+  //JSTimer *timer=data->timer;
   
   //DEFAULT
   js->addNative(F("function print(text)"), js_print, 0);  
@@ -990,7 +989,7 @@ void addDefaulFunct(UsrData *data)
 void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
   UsrData *data=(UsrData*)userdata;
   CTinyJS *js = data->js;
-  Timer *timer=data->timer;
+  JSTimer *timer=data->timer;
 #ifdef CDINOJS
   MessageProc *proc=data->proc;
 #endif  
@@ -1004,10 +1003,10 @@ void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
 
 // ----------------------------------------------- Register Functions
 #ifdef CDINOJS
-void registerFunctions(CTinyJS *js, Timer *timer, MessageProc *proc) {
+void registerFunctions(CTinyJS *js, JSTimer *timer, MessageProc *proc) {
 #endif  
 #ifndef CDINOJS
-void registerFunctions(CTinyJS *js, Timer *timer) {
+void registerFunctions(CTinyJS *js, JSTimer *timer) {
 #endif
   //Serial.begin(57600); 
   UsrData *data=new UsrData();

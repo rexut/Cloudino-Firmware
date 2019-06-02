@@ -1,17 +1,17 @@
 /*
-  Timer.cpp - Library for Cloudino Platform.
+  JSTimer.cpp - Library for Cloudino Platform.
   Created by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com, July 8, 2015
   Released into the public domain.
 */
 
 #include "JSTimer.h"
 
-Timer::Timer(){
+JSTimer::JSTimer(){
 }
 
-void Timer::loop() {
+void JSTimer::loop() {
     
-    Timer::TimerInstance *aux=_ini;
+    JSTimer::TimerInstance *aux=_ini;
     while(aux!=NULL)
     {
         unsigned long t=millis();
@@ -33,12 +33,12 @@ void Timer::loop() {
     }
 }
 
-int Timer::setTimer(unsigned long d, timer_callback f, int n) {
+int JSTimer::setTimer(unsigned long d, timer_callback f, int n) {
     return setTimer(d,f,n,"");
 }
 
-int Timer::setTimer(unsigned long d, timer_callback f, int n, timer_callback f2) {
-    Timer::TimerInstance *inst=new Timer::TimerInstance(d,f,n,f2);
+int JSTimer::setTimer(unsigned long d, timer_callback f, int n, timer_callback f2) {
+    JSTimer::TimerInstance *inst=new JSTimer::TimerInstance(d,f,n,f2);
     inst->id=_idc;
     _idc++;
     if(_ini==NULL)
@@ -53,19 +53,19 @@ int Timer::setTimer(unsigned long d, timer_callback f, int n, timer_callback f2)
     return inst->id;
 }
 
-int Timer::setInterval(unsigned long d, timer_callback f) {
+int JSTimer::setInterval(unsigned long d, timer_callback f) {
     return setTimer(d,f,-1);
 }
 
-int Timer::setTimeout(unsigned long d, timer_callback f) {
+int JSTimer::setTimeout(unsigned long d, timer_callback f) {
     return setTimer(d,f,1);
 }
 
-void Timer::deleteTimer(int id) {
+void JSTimer::deleteTimer(int id) {
     _deleteTimer(id);
 }
 
-void Timer::clear()
+void JSTimer::clear()
 {
     TimerInstance *aux=_ini;
     while(aux!=NULL)
