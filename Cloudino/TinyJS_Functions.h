@@ -43,13 +43,13 @@ struct UsrData
   CTinyJS *js;
   JSTimer *timer;
 #ifdef CDINOJS  
-  MessageProc *proc;
+  SMessageProc *proc;
 #endif  
 };
 
 /// Register useful functions with the TinyJS interpreter
 #ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, MessageProc *proc);
+extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *proc);
 #endif
 #ifndef CDINOJS
 extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);

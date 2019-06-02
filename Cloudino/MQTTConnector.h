@@ -9,7 +9,7 @@
 
 #include "src/CloudinoConf.h"
 
-MessageProc *__proc;
+SMessageProc *__proc;
 
 class MQTTConnector : public CloudConnector
 {
@@ -37,7 +37,7 @@ private:
   }
   
 public:
-  MQTTConnector(MessageProc &proc,config_t &config): CloudConnector(proc,config), ethClient(), client(ethClient)
+  MQTTConnector(SMessageProc &proc,config_t &config): CloudConnector(proc,config), ethClient(), client(ethClient)
   {
       __proc=&proc;
       //Serial.println("ini");

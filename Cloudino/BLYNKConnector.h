@@ -71,7 +71,7 @@ private:
   }
   
 public:
-  BLYNKConnector(MessageProc &proc,config_t &config): CloudConnector(proc,config)
+  BLYNKConnector(SMessageProc &proc,config_t &config): CloudConnector(proc,config)
   {
     //Serial.begin(SERIAL_SPEED); 
     //Serial.println("\ninit");

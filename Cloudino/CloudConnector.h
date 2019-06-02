@@ -13,7 +13,7 @@
 class CloudConnector
 {
 public:
-  CloudConnector(MessageProc &proc,config_t &config)
+  CloudConnector(SMessageProc &proc,config_t &config)
   {
     _proc=&proc;
     _config=&config;
@@ -34,7 +34,7 @@ public:
   virtual boolean isUploading();
 
 protected:
-  MessageProc *_proc;
+  SMessageProc *_proc;
   config_t *_config;
 private:
 }; 

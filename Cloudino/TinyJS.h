@@ -494,7 +494,7 @@ private:
 };
 
 #ifdef CDINOJS
-extern MessageProc proc;
+extern SMessageProc proc;
 extern WiFiUDP udp;
 #endif
 

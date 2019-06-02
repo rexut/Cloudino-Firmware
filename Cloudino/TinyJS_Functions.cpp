@@ -69,7 +69,7 @@ void js_restart(CScriptVar *v __attribute__((unused)), void *userdata __attribut
 void scCloudinoLocalPost(CScriptVar *v, void *userdata)
 {
     //Serial.println("scCloudinoLocalPost"); 
-    MessageProc *proc = (MessageProc*)userdata;    
+    SMessageProc *proc = (SMessageProc*)userdata;    
     String data=proc->encodePost(v->getParameter("topic")->getString(),v->getParameter("data")->getString());  
     String sip=v->getParameter("ip")->getString();
     //Serial.println(sip);
@@ -90,17 +90,17 @@ void scCloudinoLocalPost(CScriptVar *v, void *userdata)
 
 void scCloudinoPost(CScriptVar *v, void *userdata)
 {
-    MessageProc *proc = (MessageProc*)userdata;
+    SMessageProc *proc = (SMessageProc*)userdata;
     proc->processMessage(v->getParameter("topic")->getString(),v->getParameter("data")->getString());
 }
 /*
 void scCloudinoPrint(CScriptVar *v, void *userdata)
 {
-    MessageProc *proc = (MessageProc*)userdata;
+    SMessageProc *proc = (SMessageProc*)userdata;
     proc->logHandler(v->getParameter("text")->getString());
 }
 
-void js_trace(CScriptVar *var, MessageProc *proc, String indentStr, const String &name) {
+void js_trace(CScriptVar *var, SMessageProc *proc, String indentStr, const String &name) {
     proc->logHandler(indentStr+"'"+name+"' = '"+var->getString()+"' "+var->getFlagsAsString());
     String indent = indentStr+" ";
     CScriptVarLink *link = var->firstChild;
@@ -114,7 +114,7 @@ void js_scCloudinoDump(CScriptVar *v, void *userdata)
 {
     UsrData *data = (UsrData*)userdata;
     CTinyJS *js=data->js;
-    MessageProc *proc=data->proc;
+    SMessageProc *proc=data->proc;
     proc->logHandler("FreeHeap:"+String(ESP.getFreeHeap()));
     js_trace(js->root,proc,"> ","");
 }
@@ -851,7 +851,7 @@ void js_require(CScriptVar *v, void *userdata) {
   CTinyJS *js=data->js;
   JSTimer *timer=data->timer;
 #ifdef CDINOJS  
-  MessageProc *proc=data->proc;
+  SMessageProc *proc=data->proc;
 #endif
 
   String name=v->getParameter("name")->getString();
@@ -991,7 +991,7 @@ void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
   CTinyJS *js = data->js;
   JSTimer *timer=data->timer;
 #ifdef CDINOJS
-  MessageProc *proc=data->proc;
+  SMessageProc *proc=data->proc;
 #endif  
   js->reset();
   timer->clear();
@@ -1003,7 +1003,7 @@ void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
 
 // ----------------------------------------------- Register Functions
 #ifdef CDINOJS
-void registerFunctions(CTinyJS *js, JSTimer *timer, MessageProc *proc) {
+void registerFunctions(CTinyJS *js, JSTimer *timer, SMessageProc *proc) {
 #endif  
 #ifndef CDINOJS
 void registerFunctions(CTinyJS *js, JSTimer *timer) {

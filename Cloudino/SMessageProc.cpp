@@ -11,17 +11,17 @@
 //|M5|helloS6|mundo!
 //|M3|ledS2|on
 
-void MessageProc::handleMessages()
+void SMessageProc::handleMessages()
 {
   handleStreamMessages(Serial,messageHandler,logHandler);
 }
 
-void MessageProc::handleLocalMessages(Stream &stream)
+void SMessageProc::handleLocalMessages(Stream &stream)
 {
   handleStreamMessages(stream,localMessageHandler,logHandler);
 }
 
-void MessageProc::handleStreamMessages(Stream &stream, MessageFunction msgHdler, LogFunction logHdler)
+void SMessageProc::handleStreamMessages(Stream &stream, MessageFunction msgHdler, LogFunction logHdler)
 {
   if(stream.available())
   {
@@ -79,7 +79,7 @@ void MessageProc::handleStreamMessages(Stream &stream, MessageFunction msgHdler,
   }        
 }
 
-String MessageProc::encodePost(String topic, String data)
+String SMessageProc::encodePost(String topic, String data)
 {
     String ret;
     ret+=SEP;
@@ -94,7 +94,7 @@ String MessageProc::encodePost(String topic, String data)
     return ret; 
 }
 
-String MessageProc::encodeLog(String log)
+String SMessageProc::encodeLog(String log)
 {
   String ret;
   ret+=SEP;
@@ -108,7 +108,7 @@ String MessageProc::encodeLog(String log)
 /**
  * Post Message to Arduino or JavaScript
  */
-void MessageProc::post(String topic, String data)
+void SMessageProc::post(String topic, String data)
 {
   //TODO
   //Verificar si hay o no arduino
@@ -123,48 +123,48 @@ void MessageProc::post(String topic, String data)
   processServerMessage(topic,data);
 }
 
-void MessageProc::onMessage(MessageFunction fn)
+void SMessageProc::onMessage(MessageFunction fn)
 {
   messageHandler=fn;
 }
 
-void MessageProc::onServerMessage(MessageFunction fn)
+void SMessageProc::onServerMessage(MessageFunction fn)
 {
   serverMessageHandler=fn;
 }
 
-void MessageProc::onLocalMessage(MessageFunction fn)
+void SMessageProc::onLocalMessage(MessageFunction fn)
 {
   localMessageHandler=fn;
 }
 
-void MessageProc::onLog(LogFunction fn)
+void SMessageProc::onLog(LogFunction fn)
 {
   logHandler=fn;
 }
 
-boolean MessageProc::waitStream(Stream &stream)
+boolean SMessageProc::waitStream(Stream &stream)
 {
   unsigned long time=millis();
   while(stream.available()==0 && millis()-time<1000){delay(1);}
   return stream.available()>0;
 }
 
-void MessageProc::processMessage(String topic, String msg)
+void SMessageProc::processMessage(String topic, String msg)
 {
   messageHandler(topic,msg);
 }
 
-void MessageProc::processServerMessage(String topic, String msg)
+void SMessageProc::processServerMessage(String topic, String msg)
 {
   serverMessageHandler(topic,msg);
 }
 
-void MessageProc::processLocalMessage(String topic, String msg)
+void SMessageProc::processLocalMessage(String topic, String msg)
 {
   localMessageHandler(topic,msg);
 }
 
-void MessageProc::clear()
+void SMessageProc::clear()
 {
 }

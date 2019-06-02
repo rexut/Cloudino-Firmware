@@ -230,7 +230,7 @@ private:
 
   
 public:
-  CloudinoConnector(MessageProc &proc,config_t &config): CloudConnector(proc,config)
+  CloudinoConnector(SMessageProc &proc,config_t &config): CloudConnector(proc,config)
   {
     client.setNoDelay(true);
     connect();

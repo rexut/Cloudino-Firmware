@@ -9,7 +9,7 @@
 #include "../CloudinoWeb.h"
 
 #include "../../SMessageProc.h"
-extern MessageProc proc;
+extern SMessageProc proc;
 
 void handlePost()
 {

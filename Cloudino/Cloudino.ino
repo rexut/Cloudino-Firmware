@@ -19,7 +19,7 @@
 #endif
 
 #include "SMessageProc.h"
-MessageProc proc;
+SMessageProc proc;
 
 #ifdef JS_SUPPORT
 #include "TinyJS.h"

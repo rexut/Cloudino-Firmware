@@ -29,7 +29,7 @@ class OrionConnector : public CloudConnector
 {
 public:
 
-  OrionConnector(MessageProc &proc,config_t &config): CloudConnector(proc,config)
+  OrionConnector(SMessageProc &proc,config_t &config): CloudConnector(proc,config)
   {
     tupd=0;
   }

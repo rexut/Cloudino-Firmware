@@ -13,7 +13,7 @@
 extern CTinyJS *js;
 
 #include "../../SMessageProc.h"
-extern MessageProc proc;
+extern SMessageProc proc;
 
 MDNSResponder mdns;
 

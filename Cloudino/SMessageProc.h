@@ -14,7 +14,7 @@ const char MSEP='M';
 const char SSEP='S';
 const char LSEP='L';
 
-class MessageProc
+class SMessageProc
 {
   public:
     struct JSHandler;
