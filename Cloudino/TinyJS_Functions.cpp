@@ -201,7 +201,7 @@ void scCharToInt(CScriptVar *c, void *) {
 void scStringIndexOf(CScriptVar *c, void *) {
     String str = c->getParameter("this")->getString();
     String search = c->getParameter("search")->getString();
-    size_t p = str.indexOf(search);
+    int p = str.indexOf(search);
     int val = (p==NPOS) ? -1 : p;
     c->getReturnVar()->setInt(val);
 }
@@ -209,7 +209,7 @@ void scStringIndexOf(CScriptVar *c, void *) {
 void scStringLastIndexOf(CScriptVar *c, void *) {
     String str = c->getParameter("this")->getString();
     String search = c->getParameter("search")->getString();
-    size_t p = str.lastIndexOf(search);
+    int p = str.lastIndexOf(search);
     int val = (p==NPOS) ? -1 : p;
     c->getReturnVar()->setInt(val);
 }
@@ -259,7 +259,7 @@ void scStringSplit(CScriptVar *c, void *) {
     result->setArray();
     int length = 0;
 
-    size_t pos = str.indexOf(sep);
+    int pos = str.indexOf(sep);
     while (pos != NPOS) {
       result->setArrayIndex(length++, new CScriptVar(str.substring(0,pos)));
       str = str.substring(pos+1);

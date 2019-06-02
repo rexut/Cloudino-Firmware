@@ -98,7 +98,7 @@ bool isNumeric(char ch) {
 }
 
 bool isNumber(const String &str) {
-    for (size_t i=0;i<str.length();i++)
+    for (unsigned int i=0;i<str.length();i++)
       if (!isNumeric(str.charAt(i))) return false;
     return true;
 }
@@ -125,7 +125,7 @@ bool isIDString(const char *s) {
 /// convert the given string into a quoted string suitable for javascript
 String getJSString(const String &str) {
     String nStr = str;
-    for (size_t i=0;i<nStr.length();i++) {
+    for (unsigned int i=0;i<nStr.length();i++) {
       const char *replaceWith = "";
       bool replace = true;
 
@@ -157,7 +157,7 @@ String getJSString(const String &str) {
 bool isAlphaNum(const String &str) {
     if (str.length()==0) return true;
     if (!isAlpha(str.charAt(0))) return false;
-    for (size_t i=0;i<str.length();i++)
+    for (unsigned int i=0;i<str.length();i++)
       if (!(isAlpha(str.charAt(i)) || isNumeric(str.charAt(i))))
         return false;
     return true;
@@ -662,7 +662,7 @@ CScriptVarLink *CScriptVar::findChildOrCreate(const String &childName, int varFl
 }
 
 CScriptVarLink *CScriptVar::findChildOrCreateByPath(const String &path) {
-  size_t p = path.indexOf('.');
+  int p = path.indexOf('.');
   if (p == NPOS)
     return findChildOrCreate(path);
 
@@ -2071,12 +2071,12 @@ void CTinyJS::statement(bool &execute) {
 /// Get the given variable specified by a path (var1.var2.etc), or return 0
 CScriptVar *CTinyJS::getScriptVariable(const String &path) {
     // traverse path
-    size_t prevIdx = 0;
-    size_t thisIdx = path.indexOf('.');
+    int prevIdx = 0;
+    int thisIdx = path.indexOf('.');
     if (thisIdx == NPOS) thisIdx = path.length();
     CScriptVar *var = root;
     //Serial.println("1:"+path+"->prevIdx:"+String(prevIdx)+" thisIdx:"+String(thisIdx));
-    while (var && prevIdx<path.length()) {
+    while (var && (unsigned int)prevIdx<path.length()) {
         String el = path.substring(prevIdx, thisIdx);
         //Serial.println("el:"+el);
         CScriptVarLink *varl = var->findChild(el);
