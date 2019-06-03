@@ -7,93 +7,75 @@
 #ifndef JSTimer_h
 #define JSTimer_h
 
-#include <Arduino.h> 
+#include <Arduino.h>  // for type definitions
 
-class JSTimer {
-public:
-    // constructor
-    JSTimer();
+class JSTimer
+{
+  protected:
+
+    int _idc = 0;     // accumulation of IDs
 
     typedef String timer_callback;
     typedef void (*timer_global_callback)(timer_callback);
 
-
-    struct TimerInstance{
-      TimerInstance(unsigned long time, timer_callback fn, int n, timer_callback fn2): time(time), fn(fn), n(n), fn2(fn2)
-      {
-        ltime=millis();
-      }
-      int id;
-      unsigned long ltime=0;
-      unsigned long time=0;
-      timer_callback fn;
-      int n;
-      timer_callback fn2;
-      TimerInstance *next=NULL;;
-    };    
-
-    // this function must be called inside loop()
-    void loop();
-
-    // call function f every d milliseconds
-    int setInterval(unsigned long d, timer_callback f);
-
-    // call function f once after d milliseconds
-    int setTimeout(unsigned long d, timer_callback f);
-
-    // call function f every d milliseconds for n times
-    int setTimer(unsigned long d, timer_callback f, int n);
-
-    // call function f every d milliseconds for n times and the end call function f2
-    int setTimer(unsigned long d, timer_callback f, int n, timer_callback f2);
-
-    // destroy the specified timer
-    void deleteTimer(int id);
-
-    void setGlobalCallBack(timer_global_callback fn)
-    {
-      funct=fn;
-    }
-
-    void clear();
-
-protected:
-    int _idc=0;  //contadore de IDs
-    TimerInstance *_ini=NULL;
-    TimerInstance *_end=NULL;
-
     timer_global_callback funct;
 
-    /**
-    * Regresa el siguiente elemento en la lista
-    */
-    TimerInstance *_deleteTimer(int id)
+    struct TimerInstance
     {
-        TimerInstance *prev=NULL;
-        TimerInstance *aux=_ini;
-        while(aux!=NULL)
-        {
-            if(aux->id==id){
-                TimerInstance *next=aux->next;
-                if(prev==NULL)
-                {
-                    _ini=next;
-                }else
-                {
-                    prev->next=next;
-                }
-                if(next==NULL)
-                {
-                    _end=prev;
-                }
-                delete aux;
-                return next;
-            }
-            prev=aux;
-            aux=aux->next;
-        }
-        return NULL;
-    }    
+      TimerInstance(unsigned long time, timer_callback fnTimed,
+                    int num, timer_callback fnNumbered)
+      : time(time)
+      , tcbTimed(fnTimed)
+      , num(num)
+      , tcbNumbered(fnNumbered)
+      {
+        lltime = millis();
+      }
+
+      int id;   // identifier and next instance pointer
+      TimerInstance *next = NULL;;
+
+      unsigned long lltime = 0;   // last loop time
+
+      unsigned long time = 0;     // trigger time
+      timer_callback tcbTimed;    // trigger callback function
+
+      int num;                    // number of triggers
+      timer_callback tcbNumbered; // numbered trigger callback function
+    };
+
+    TimerInstance *_ini = NULL;
+    TimerInstance *_end = NULL;
+
+    TimerInstance *_deleteTimer(int id);
+
+  public:
+
+    JSTimer();
+    void setGlobalCallBack(timer_global_callback fn);
+
+    // this function must be called inside the Arduino super loop
+    void loop();
+
+    // call JS function fd() every d milliseconds
+    int setInterval(unsigned long d, timer_callback fd);
+
+    // call JS function fd() once after d milliseconds
+    int setTimeout(unsigned long d, timer_callback fd);
+
+    // call JS function fd() every d milliseconds for n times
+    int setTimer(unsigned long d, timer_callback fd, int n);
+
+    // call JS function fd() every d milliseconds for n times
+    // and the end call JS function fn()
+    int setTimer(unsigned long d, timer_callback fd,
+                 int n, timer_callback fn);
+
+    // destroy the specified timer instance
+    void deleteTimer(int id);
+
+    // destroy all timer instances
+    void clear();
 };
 
 #endif  // JSTimer_h

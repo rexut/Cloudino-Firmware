@@ -1,12 +1,12 @@
 /*
-  JSTimer/JSTimer.cpp - Library for Cloudino Platform.
+  JSTimer/setInterval.cpp - Library for Cloudino Platform.
   Created by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com, July 8, 2015
   Released into the public domain.
 */
 
 #include "../JSTimer.h"
 
-JSTimer::JSTimer()
+int JSTimer::setInterval(unsigned long d, timer_callback fd)
 {
-  /* nothing to construct */
+  return setTimer(d, fd, -1);
 }
