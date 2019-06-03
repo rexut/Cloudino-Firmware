@@ -3,7 +3,7 @@
  *
  * A single-file Javascript-alike engine
  *
- * - Useful language functions
+ * - Common utility functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
  * (https://github.com/gfwilliams/tiny-js)
@@ -32,30 +32,44 @@
  * SOFTWARE.
  */
 
-#ifndef TinyJS_Functions_h
-#define TinyJS_Functions_h
+#ifndef TinyJS_Utils_h
+#define TinyJS_Utils_h
 
-#include "../TinyJS.h"
-#include "../JSTimer.h"
-#ifdef CDINOJS
-#include "../SMessageProc.h"
+#include <Arduino.h>  // for type definitions
+
+// Convert the given string into a quoted string suitable for JavaScript.
+String getJSString(const String &str);
+
+bool isWhitespace(char ch);
+bool isHexadecimal(char ch);
+bool isNumeric(char ch);
+bool isAlpha(char ch);
+bool isNumber(const String &str);
+bool isAlphaNum(const String &str);
+bool isIDString(const char *s);
+
+// Frees the given link IF it isn't owned by anything else.
+#define CLEAN(x) { \
+  CScriptVarLink *__v = x; \
+  if (__v && !__v->owned) { \
+    delete __v; \
+  } \
+}
+
+// Create a LINK to point to VAR and free the old link.
+// BUT this is more clever - it tries to keep the old link
+// IF it's not owned to save allocations.
+#define CREATE_LINK(LINK, VAR) { \
+  if (!LINK || LINK->owned) \
+    LINK = new CScriptVarLink(VAR); \
+  else \
+    LINK->replaceWith(VAR); \
+}
+
+#ifdef __GNUC__
+#define vsprintf_s vsnprintf
+#define sprintf_s snprintf
+#define _strdup strdup
 #endif
 
-struct UsrData
-{
-  CTinyJS *js;
-  JSTimer *timer;
-#ifdef CDINOJS
-  SMessageProc *proc;
-#endif
-};
-
-/// Register useful functions with the TinyJS interpreter
-#ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *proc);
-#endif
-#ifndef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
-#endif
-
-#endif  // TinyJS_Functions_h
+#endif  // TinyJS_Utils_h

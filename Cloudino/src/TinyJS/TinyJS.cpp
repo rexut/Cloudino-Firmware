@@ -30,42 +30,13 @@
  * SOFTWARE.
  */
 
-/*
-    NOTE:
-          Constructing an array with an initial length 'Array(5)' doesn't
-          work. Recursive loops of data such as a.foo = a; fail to be garbage
-          collected length variable cannot be set. The postfix increment
-          operator returns the current value, not the previous as it should.
-          There is no prefix increment operator. Arrays are implemented as a
-          linked list - hence a lookup time is O(n)
-
-    TODO:
-          Utility va-args style function in TinyJS for executing a function
-          directly. Merge the parsing of expressions/statements so
-          eval("statement") works like we'd expect. Move 'shift'
-          implementation into mathsOp.
-
- */
-
 #include "../TinyJS.h"
-/* Frees the given link IF it isn't owned by anything else */
-#define CLEAN(x) { CScriptVarLink *__v = x; if (__v && !__v->owned) { delete __v; } }
-/* Create a LINK to point to VAR and free the old link.
- * BUT this is more clever - it tries to keep the old link if it's not owned to save allocations */
-#define CREATE_LINK(LINK, VAR) { if (!LINK || LINK->owned) LINK = new CScriptVarLink(VAR); else LINK->replaceWith(VAR); }
 
-#ifdef __GNUC__
-#define vsprintf_s vsnprintf
-#define sprintf_s snprintf
-#define _strdup strdup
-#endif
-
-// --------------------------------------------------------------- Memory Debug
+#include "Utils.h"
 
 #define NPOS -1
 
-String _S_NULL = "null";
-String _S_UNDEFINED = "undefined";
+// --------------------------------------------------------------- Memory Debug
 
 void TRACE_F(const char *format, ...)
 {
@@ -90,81 +61,6 @@ void TRACE(String txt)
 #ifndef CDINOJS
     TRACE_OBJ.print(txt);
 #endif
-}
-
-// --------------------------------------------------------------- Utils
-bool isWhitespace(char ch) {
-    return (ch==' ') || (ch=='\t') || (ch=='\n') || (ch=='\r');
-}
-
-bool isNumeric(char ch) {
-    return (ch>='0') && (ch<='9');
-}
-
-bool isNumber(const String &str) {
-    for (unsigned int i=0;i<str.length();i++)
-      if (!isNumeric(str.charAt(i))) return false;
-    return true;
-}
-bool isHexadecimal(char ch) {
-    return ((ch>='0') && (ch<='9')) ||
-           ((ch>='a') && (ch<='f')) ||
-           ((ch>='A') && (ch<='F'));
-}
-bool isAlpha(char ch) {
-    return ((ch>='a') && (ch<='z')) || ((ch>='A') && (ch<='Z')) || ch=='_';
-}
-
-bool isIDString(const char *s) {
-    if (!isAlpha(*s))
-        return false;
-    while (*s) {
-        if (!(isAlpha(*s) || isNumeric(*s)))
-            return false;
-        s++;
-    }
-    return true;
-}
-
-/// convert the given string into a quoted string suitable for javascript
-String getJSString(const String &str) {
-    String nStr = str;
-    for (unsigned int i=0;i<nStr.length();i++) {
-      const char *replaceWith = "";
-      bool replace = true;
-
-      switch (nStr.charAt(i)) {
-        case '\\': replaceWith = "\\\\"; break;
-        case '\n': replaceWith = "\\n"; break;
-        case '\r': replaceWith = "\\r"; break;
-        case '\a': replaceWith = "\\a"; break;
-        case '"': replaceWith = "\\\""; break;
-        default: {
-          int nCh = ((int)nStr.charAt(i)) &0xFF;
-          if (nCh<32 || nCh>127) {
-            char buffer[5];
-            sprintf_s(buffer, 5, "\\x%02X", nCh);
-            replaceWith = buffer;
-          } else replace=false;
-        }
-      }
-
-      if (replace) {
-        nStr = nStr.substring(0, i) + replaceWith + nStr.substring(i+1);
-        i += strlen(replaceWith)-1;
-      }
-    }
-    return "\"" + nStr + "\"";
-}
-
-/** Is the string alphanumeric */
-bool isAlphaNum(const String &str) {
-    if (str.length()==0) return true;
-    if (!isAlpha(str.charAt(0))) return false;
-    for (unsigned int i=0;i<str.length();i++)
-      if (!(isAlpha(str.charAt(i)) || isNumeric(str.charAt(i))))
-        return false;
-    return true;
 }
 
 // --------------------------------------------------------------- CSCRIPTEXCEPTION
@@ -819,6 +715,10 @@ double CScriptVar::getDouble() {
     if (isUndefined()) return 0;
     return 0; /* or NaN? */
 }
+
+// String encodings suitable for JavaScript.
+String _S_NULL = "null";
+String _S_UNDEFINED = "undefined";
 
 const String &CScriptVar::getString() {
     /* Because we can't return a string that is generated on demand.

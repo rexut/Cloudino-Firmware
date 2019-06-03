@@ -33,10 +33,27 @@
 #ifndef TinyJS_h
 #define TinyJS_h
 
+/*
+    NOTE:
+          Constructing an array with an initial length 'Array(5)' doesn't
+          work. Recursive loops of data such as a.foo = a; fail to be garbage
+          collected length variable cannot be set. The postfix increment
+          operator returns the current value, not the previous as it should.
+          There is no prefix increment operator. Arrays are implemented as a
+          linked list - hence a lookup time is O(n)
+
+    TODO:
+          Utility va-args style function in TinyJS for executing a function
+          directly. Merge the parsing of expressions/statements so
+          eval("statement") works like we'd expect. Move 'shift'
+          implementation into mathsOp.
+
+ */
+
 #define CDINOJS
 
 #ifndef CDINOJS
-#include <Arduino.h>
+#include <Arduino.h>  // for type definitions
 #endif
 
 #ifdef CDINOJS
@@ -140,9 +157,6 @@ enum SCRIPTVAR_FLAGS {
 #define TINYJS_PROTOTYPE_CLASS "prototype"
 #define TINYJS_TEMP_NAME ""
 #define TINYJS_BLANK_DATA ""
-
-/// convert the given string into a quoted string suitable for javascript
-String getJSString(const String &str);
 
 class CScriptException {
 public:

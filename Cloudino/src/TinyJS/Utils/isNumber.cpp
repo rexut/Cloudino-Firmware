@@ -3,7 +3,7 @@
  *
  * A single-file Javascript-alike engine
  *
- * - Useful language functions
+ * - Common utility functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
  * (https://github.com/gfwilliams/tiny-js)
@@ -32,30 +32,13 @@
  * SOFTWARE.
  */
 
-#ifndef TinyJS_Functions_h
-#define TinyJS_Functions_h
+#include "../Utils.h"
 
-#include "../TinyJS.h"
-#include "../JSTimer.h"
-#ifdef CDINOJS
-#include "../SMessageProc.h"
-#endif
-
-struct UsrData
+bool isNumber(const String &str)
 {
-  CTinyJS *js;
-  JSTimer *timer;
-#ifdef CDINOJS
-  SMessageProc *proc;
-#endif
-};
+  for (unsigned int i = 0; i < str.length(); i++)
+    if (!isNumeric(str.charAt(i)))
+      return false;
 
-/// Register useful functions with the TinyJS interpreter
-#ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *proc);
-#endif
-#ifndef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
-#endif
-
-#endif  // TinyJS_Functions_h
+  return true;
+}

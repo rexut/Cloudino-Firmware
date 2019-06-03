@@ -3,7 +3,7 @@
  *
  * A single-file Javascript-alike engine
  *
- * - Useful language functions
+ * - Common utility functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
  * (https://github.com/gfwilliams/tiny-js)
@@ -32,30 +32,62 @@
  * SOFTWARE.
  */
 
-#ifndef TinyJS_Functions_h
-#define TinyJS_Functions_h
+#include "../Utils.h"
 
-#include "../TinyJS.h"
-#include "../JSTimer.h"
-#ifdef CDINOJS
-#include "../SMessageProc.h"
-#endif
-
-struct UsrData
+String getJSString(const String &str)
 {
-  CTinyJS *js;
-  JSTimer *timer;
-#ifdef CDINOJS
-  SMessageProc *proc;
-#endif
-};
+  String nStr = str;
 
-/// Register useful functions with the TinyJS interpreter
-#ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *proc);
-#endif
-#ifndef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
-#endif
+  for (unsigned int i = 0; i < nStr.length(); i++) {
 
-#endif  // TinyJS_Functions_h
+    const char *replaceWith = "";
+    bool replace = true;
+
+    switch (nStr.charAt(i)) {
+
+      case '\\':
+        replaceWith = "\\\\";
+	break;
+
+      case '\n':
+        replaceWith = "\\n";
+	break;
+
+      case '\r':
+        replaceWith = "\\r";
+	break;
+
+      case '\a':
+        replaceWith = "\\a";
+	break;
+
+      case '"':
+        replaceWith = "\\\"";
+	break;
+
+      default: {
+        int nCh = ((int)nStr.charAt(i)) & 0xFF;
+
+        if (nCh < 32 || nCh > 127) {
+
+          char buffer[5];
+          sprintf_s(buffer, 5, "\\x%02X", nCh);
+          replaceWith = buffer;
+
+        } else {
+          replace=false;
+        }
+      }
+    }
+
+    // adjust character in new string when needed
+    if (replace) {
+      nStr = nStr.substring(0, i) + replaceWith + nStr.substring(i + 1);
+      i += strlen(replaceWith) - 1;
+    }
+
+  }
+
+  // return new string with enclosed quote characters
+  return "\"" + nStr + "\"";
+}
