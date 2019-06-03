@@ -1062,7 +1062,7 @@ void CTinyJS::trace() {
 
 void CTinyJS::execute(const String &code) {
     CScriptLex *oldLex = l;
-    Vector<CScriptVar*> oldScopes = scopes;
+    std::vector<CScriptVar*> oldScopes = scopes;
     l = new CScriptLex(code);
 #ifdef TINYJS_CALL_STACK
     call_stack.clear();
@@ -1092,7 +1092,7 @@ void CTinyJS::execute(const String &code) {
 
 CScriptVarLink CTinyJS::evaluateComplex(const String &code) {
     CScriptLex *oldLex = l;
-    Vector<CScriptVar*> oldScopes = scopes;
+    std::vector<CScriptVar*> oldScopes = scopes;
 
     l = new CScriptLex(code);
 #ifdef TINYJS_CALL_STACK

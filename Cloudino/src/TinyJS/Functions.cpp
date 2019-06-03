@@ -628,7 +628,7 @@ void scArrayContains(CScriptVar *c, void *data __attribute__((unused))) {
 
 void scArrayRemove(CScriptVar *c, void *data __attribute__((unused))) {
   CScriptVar *obj = c->getParameter("obj");
-  Vector<int> removedIndices;
+  std::vector<int> removedIndices;
   CScriptVarLink *v;
   // remove
   v = c->getParameter("this")->firstChild;
