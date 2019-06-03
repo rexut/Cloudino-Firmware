@@ -66,17 +66,12 @@ extern WiFiUDP udp;
 // This is slower, but good for debugging
 // #define TINYJS_CALL_STACK
 
-#define TRACE_OBJ Serial
 #define STD_VECTOR
 
 #ifdef STD_VECTOR
 #include <vector>
 #define Vector std::vector
 #endif
-
-void TRACE_F(const char *format, ...);
-
-void TRACE(String txt);
 
 const int TINYJS_LOOP_MAX_ITERATIONS = 100;// 8192;     //depend of your memory 200 bytes per iteration
 

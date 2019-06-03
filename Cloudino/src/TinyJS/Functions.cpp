@@ -32,16 +32,20 @@
  * SOFTWARE.
  */
 
+#include "Trace.h"
 #include "Functions.h"
+
+#include "../CloudinoConf.h"
+
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <math.h>
+
 #ifdef RCSWITCH_SUPPORT
 #include <RCSwitch.h>
 RCSwitch *rcswitch = NULL;
 #endif
 
-#include "../CloudinoConf.h"
+#include <math.h>
 
 #define NPOS -1
 

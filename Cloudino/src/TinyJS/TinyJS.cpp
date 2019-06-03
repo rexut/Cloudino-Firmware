@@ -33,35 +33,9 @@
 #include "../TinyJS.h"
 
 #include "Utils.h"
+#include "Trace.h"
 
 #define NPOS -1
-
-// --------------------------------------------------------------- Memory Debug
-
-void TRACE_F(const char *format, ...)
-{
-    va_list arg;
-    va_start(arg, format);
-    char temp[1024];
-    vsnprintf(temp, 1024, format, arg);
-#ifdef CDINOJS
-    proc.logHandler(temp);
-#endif
-#ifndef CDINOJS
-    TRACE_OBJ.print(temp);
-#endif
-    va_end(arg);
-}
-
-void TRACE(String txt)
-{
-#ifdef CDINOJS
-    proc.logHandler(txt);
-#endif
-#ifndef CDINOJS
-    TRACE_OBJ.print(txt);
-#endif
-}
 
 // --------------------------------------------------------------- CSCRIPTEXCEPTION
 
