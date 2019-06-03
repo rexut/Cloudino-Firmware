@@ -4,7 +4,8 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * 
+ * (https://github.com/gfwilliams/tiny-js)
+ *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
  * Nov 2015
  *
@@ -29,22 +30,22 @@
  * SOFTWARE.
  */
 
-#ifndef TINYJS_FUNCTIONS_H
-#define TINYJS_FUNCTIONS_H
+#ifndef TinyJS_Functions_h
+#define TinyJS_Functions_h
 
-#include "TinyJS.h"
-#include "src/JSTimer.h"
+#include "../TinyJS.h"
+#include "../JSTimer.h"
 #ifdef CDINOJS
-#include "src/SMessageProc.h"
+#include "../SMessageProc.h"
 #endif
 
 struct UsrData
 {
   CTinyJS *js;
   JSTimer *timer;
-#ifdef CDINOJS  
+#ifdef CDINOJS
   SMessageProc *proc;
-#endif  
+#endif
 };
 
 /// Register useful functions with the TinyJS interpreter
@@ -55,4 +56,4 @@ extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *pro
 extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
 #endif
 
-#endif
+#endif  // TinyJS_Functions_h

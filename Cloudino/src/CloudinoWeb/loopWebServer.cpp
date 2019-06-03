@@ -10,7 +10,7 @@
 #include "../CloudinoWeb.h"
 #include "../SMessageProc.h"
 
-#include "../../TinyJS.h"
+#include "../TinyJS.h"
 extern CTinyJS *js;
 
 MDNSResponder mdns;

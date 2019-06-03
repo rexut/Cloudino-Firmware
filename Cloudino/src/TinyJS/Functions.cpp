@@ -6,9 +6,10 @@
  * - Useful language functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * 
+ * (https://github.com/gfwilliams/tiny-js)
+ *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
- * Nov 2015 
+ * Nov 2015
  *
  * Copyright (C) 2009 Pur3 Ltd
  *
@@ -31,7 +32,7 @@
  * SOFTWARE.
  */
 
-#include "TinyJS_Functions.h"
+#include "Functions.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <math.h>
@@ -40,7 +41,7 @@
 RCSwitch *rcswitch = NULL;
 #endif
 
-#include "src/CloudinoConf.h"
+#include "../CloudinoConf.h"
 
 #define NPOS -1
 
@@ -68,12 +69,12 @@ void js_restart(CScriptVar *v __attribute__((unused)), void *userdata __attribut
 //CLOUDINO Functions
 void scCloudinoLocalPost(CScriptVar *v, void *userdata)
 {
-    //Serial.println("scCloudinoLocalPost"); 
-    SMessageProc *proc = (SMessageProc*)userdata;    
-    String data=proc->encodePost(v->getParameter("topic")->getString(),v->getParameter("data")->getString());  
+    //Serial.println("scCloudinoLocalPost");
+    SMessageProc *proc = (SMessageProc*)userdata;
+    String data=proc->encodePost(v->getParameter("topic")->getString(),v->getParameter("data")->getString());
     String sip=v->getParameter("ip")->getString();
     //Serial.println(sip);
-      
+
     IPAddress ip=WiFi.localIP();
     if(sip!="undefined")
     {
@@ -131,7 +132,7 @@ void js_digitalWrite(CScriptVar *v, void *userdata __attribute__((unused))) {
 
 void js_digitalRead(CScriptVar *v, void *userdata __attribute__((unused))) {
   int value=digitalRead(v->getParameter("pin")->getInt());
-  v->getReturnVar()->setInt(value);  
+  v->getReturnVar()->setInt(value);
 }
 
 void js_analogRead(CScriptVar *v, void *userdata __attribute__((unused))) {
@@ -235,7 +236,7 @@ void scStringCharAt(CScriptVar *c, void *) {
     String str = c->getParameter("this")->getString();
     int p = c->getParameter("pos")->getInt();
     char str2[]={str.charAt(p),'\0'};
-    
+
     if (p>=0 && p<(int)str.length())
       c->getReturnVar()->setString(str2);
     else
@@ -319,21 +320,21 @@ void addIntChild(CScriptVar *ret, String name, int val)
 {
     CScriptVar *var = new CScriptVar();
     var->setInt(val);
-    ret->addChild(name, var);  
+    ret->addChild(name, var);
 }
 
 void addDoubleChild(CScriptVar *ret, String name, double val)
 {
     CScriptVar *var = new CScriptVar();
     var->setDouble(val);
-    ret->addChild(name, var);  
+    ret->addChild(name, var);
 }
 
 void addStringChild(CScriptVar *ret, String name, String val)
 {
     CScriptVar *var = new CScriptVar();
     var->setString(val);
-    ret->addChild(name, var);  
+    ret->addChild(name, var);
 }
 
 //#define DHTLIB_OK              0
@@ -349,10 +350,10 @@ void scDHT11Read(CScriptVar *c, void *data) {
     uint8_t bits[5];
     uint8_t cnt = 7;
     uint8_t idx = 0;
-  
+
     // EMPTY BUFFER
     for (int i=0; i< 5; i++) bits[i] = 0;
-  
+
     // REQUEST SAMPLE
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
@@ -360,28 +361,28 @@ void scDHT11Read(CScriptVar *c, void *data) {
     digitalWrite(pin, HIGH);
     delayMicroseconds(40);
     pinMode(pin, INPUT);
-  
+
     // ACKNOWLEDGE or TIMEOUT
     unsigned int loopCnt = 10000;
     while(digitalRead(pin) == LOW)
     {
-      if (loopCnt-- == 0) 
+      if (loopCnt-- == 0)
       {
-        addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT);   
+        addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT);
         return;
       }
     }
-  
+
     loopCnt = 10000;
     while(digitalRead(pin) == HIGH)
     {
       if (loopCnt-- == 0)
       {
-        addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT); 
+        addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT);
         return;
       }
     }
-  
+
     // READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
     for (int i=0; i<40; i++)
     {
@@ -390,23 +391,23 @@ void scDHT11Read(CScriptVar *c, void *data) {
       {
         if (loopCnt-- == 0)
         {
-          addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT); 
+          addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT);
           return;
         }
       }
-  
+
       unsigned long t = micros();
-  
+
       loopCnt = 10000;
       while(digitalRead(pin) == HIGH)
       {
-        if (loopCnt-- == 0) 
+        if (loopCnt-- == 0)
         {
-          addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT); 
+          addIntChild(ret,"err",DHTLIB_ERROR_TIMEOUT);
           return;
         }
       }
-  
+
       if ((micros() - t) > 40) bits[idx] |= (1 << cnt);
       if (cnt == 0)   // next byte?
       {
@@ -415,17 +416,17 @@ void scDHT11Read(CScriptVar *c, void *data) {
       }
       else cnt--;
     }
-  
+
     // WRITE TO RIGHT VARS
     // as bits[1] and bits[3] are allways zero they are omitted in formulas.
     addIntChild(ret,F("humidity"),bits[0]);
     addIntChild(ret,F("temperature"),bits[2]);
 
-    uint8_t sum = bits[0] + bits[2];  
-  
-    if (bits[4] != sum) 
+    uint8_t sum = bits[0] + bits[2];
+
+    if (bits[4] != sum)
     {
-      addIntChild(ret,"err",DHTLIB_ERROR_CHECKSUM); 
+      addIntChild(ret,"err",DHTLIB_ERROR_CHECKSUM);
       return;
     }
     //return DHTLIB_OK;
@@ -437,7 +438,7 @@ void scHCSR04Read(CScriptVar *c, void *data) {
     int hpin = c->getParameter("hpin")->getInt();
 
     int val=-1;
-  
+
     pinMode(tpin, OUTPUT);
     digitalWrite(tpin, LOW);
     pinMode(hpin, INPUT);
@@ -445,19 +446,19 @@ void scHCSR04Read(CScriptVar *c, void *data) {
     digitalWrite(tpin, HIGH);  //generamos Trigger (disparo) de 10us
     delayMicroseconds(10);
     digitalWrite(tpin, LOW);
-  
+
     long duration = pulseIn(hpin, HIGH, 23400);  //medimos el tiempo entre pulsos, en microsegundos
-    
+
     val = duration * 10 / 292/ 2;   //convertimos a distancia, en cm
-    
-    c->getReturnVar()->setInt(val);         
+
+    c->getReturnVar()->setInt(val);
 }
 
 #ifdef RCSWITCH_SUPPORT
 
 void scRCSwitchEnableTransmit(CScriptVar *c, void *data) {
     CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
-    //protocol,pin,pulseLength,repeat    
+    //protocol,pin,pulseLength,repeat
     int protocol = c->getParameter("protocol")->getInt();
     int pin = c->getParameter("pin")->getInt();
     int pulseLength = c->getParameter("pulseLength")->getInt();
@@ -472,7 +473,7 @@ void scRCSwitchEnableTransmit(CScriptVar *c, void *data) {
 
 void scRCSwitchEnableReceive(CScriptVar *c, void *data) {
     CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
-    //pin    
+    //pin
     int pin = c->getParameter("pin")->getInt();
     if(rcswitch==NULL)rcswitch=new RCSwitch();
     rcswitch->disableReceive();
@@ -482,11 +483,11 @@ void scRCSwitchEnableReceive(CScriptVar *c, void *data) {
 
 void scRCSwitchSend(CScriptVar *c, void *data) {
     CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
-    //protocol,tpin,rpin,pulseLength,repeat    
+    //protocol,tpin,rpin,pulseLength,repeat
     String code = c->getParameter("code")->getString();
     if(rcswitch)
     {
-      int str_len = code.length() + 1; 
+      int str_len = code.length() + 1;
       char char_array[str_len];
       code.toCharArray(char_array, str_len);
       rcswitch->send(char_array);
@@ -495,7 +496,7 @@ void scRCSwitchSend(CScriptVar *c, void *data) {
 }
 
 static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength){
-  static char bin[64]; 
+  static char bin[64];
   unsigned int i=0;
 
   while (Dec > 0) {
@@ -511,7 +512,7 @@ static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength){
     }
   }
   bin[bitLength] = '\0';
-  
+
   return bin;
 }
 
@@ -519,13 +520,13 @@ void scRCSwitchReceive(CScriptVar *c, void *data) {
     CTinyJS *tinyJS __attribute__((unused)) = (CTinyJS *)data;
 
     if(rcswitch)
-    {                    
-        //TRACE("available:"+String(rcswitch->available()));        
-        if (rcswitch->available()) 
-        {                  
+    {
+        //TRACE("available:"+String(rcswitch->available()));
+        if (rcswitch->available())
+        {
             String code=dec2binWzerofill(rcswitch->getReceivedValue(), rcswitch->getReceivedBitlength());
-            //TRACE("code:"+code);    
-            CScriptVar *ret=c->getReturnVar();  
+            //TRACE("code:"+code);
+            CScriptVar *ret=c->getReturnVar();
             addIntChild(ret,F("protocol"),rcswitch->getReceivedProtocol());
             addDoubleChild(ret,F("value"),rcswitch->getReceivedValue());
             addStringChild(ret,F("code"),code);
@@ -546,19 +547,19 @@ void scHTTPSSend(CScriptVar *c, void *data) {
 
   WiFiClientSecure client;
   if(client.connect(host.c_str(), port))
-  { 
+  {
     client.print(content);
 
     int timeout = 5 * 10; // 5 seconds
     while (!client.available() && (timeout-- > 0)) {
       delay(100);
     }
-  
+
     String result;
     // Read all the lines of the reply from server and print them to Serial
     while(client.available()){
       result += client.readStringUntil('\n');
-    }    
+    }
     c->getReturnVar()->setString(result);
   }
 }
@@ -571,38 +572,38 @@ void scHTTPSend(CScriptVar *c, void *data __attribute__((unused))) {
 
   WiFiClient client;
   if(client.connect(host.c_str(), port))
-  { 
+  {
     client.print(content);
 
     int timeout = 5 * 10; // 5 seconds
     while (!client.available() && (timeout-- > 0)) {
       delay(100);
     }
-  
+
     String result;
     // Read all the lines of the reply from server and print them to Serial
     while(client.available()){
       result += client.readStringUntil('\n');
-    }    
+    }
     c->getReturnVar()->setString(result);
   }
 }
 
-void scHTTPURL(CScriptVar *c, void *data __attribute__((unused))) 
+void scHTTPURL(CScriptVar *c, void *data __attribute__((unused)))
 {
     String url = c->getParameter("url")->getString();
-  
+
     HTTPClient http;
     http.begin(url);
     int httpCode = http.GET();
-  
-    if(httpCode > 0) 
+
+    if(httpCode > 0)
     {
         if(httpCode == HTTP_CODE_OK) {
             c->getReturnVar()->setString(http.getString());
         }
     }
-    http.end();      
+    http.end();
 }
 
 void scArrayContains(CScriptVar *c, void *data __attribute__((unused))) {
@@ -674,11 +675,11 @@ void scArrayJoin(CScriptVar *c, void *data __attribute__((unused))) {
 #define F_ROUND(a)          ((a)>0 ? (int) ((a)+0.5) : (int) ((a)-0.5) )
 
 #define scIsInt(a)          ( c->getParameter(a)->isInt() )
-#define scIsDouble(a)       ( c->getParameter(a)->isDouble() )  
+#define scIsDouble(a)       ( c->getParameter(a)->isDouble() )
 #define scGetInt(a)         ( c->getParameter(a)->getInt() )
-#define scGetDouble(a)      ( c->getParameter(a)->getDouble() )  
+#define scGetDouble(a)      ( c->getParameter(a)->getDouble() )
 #define scReturnInt(a)      ( c->getReturnVar()->setInt(a) )
-#define scReturnDouble(a)   ( c->getReturnVar()->setDouble(a) )  
+#define scReturnDouble(a)   ( c->getReturnVar()->setDouble(a) )
 
 //Math.abs(x) - returns absolute of given value
 void scMathAbs(CScriptVar *c, void *userdata __attribute__((unused))) {
@@ -698,7 +699,7 @@ void scMathRound(CScriptVar *c, void *userdata __attribute__((unused))) {
     }
 }
 
-//Math.min(a,b) - returns minimum of two given values 
+//Math.min(a,b) - returns minimum of two given values
 void scMathMin(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( (scIsInt("a")) && (scIsInt("b")) ) {
       scReturnInt( F_MIN( scGetInt("a"), scGetInt("b") ) );
@@ -707,7 +708,7 @@ void scMathMin(CScriptVar *c, void *userdata __attribute__((unused))) {
     }
 }
 
-//Math.max(a,b) - returns maximum of two given values  
+//Math.max(a,b) - returns maximum of two given values
 void scMathMax(CScriptVar *c, void *userdata __attribute__((unused))) {
     if ( (scIsInt("a")) && (scIsInt("b")) ) {
       scReturnInt( F_MAX( scGetInt("a"), scGetInt("b") ) );
@@ -717,7 +718,7 @@ void scMathMax(CScriptVar *c, void *userdata __attribute__((unused))) {
 }
 
 /*
-//Math.range(x,a,b) - returns value limited between two given values  
+//Math.range(x,a,b) - returns value limited between two given values
 void scMathRange(CScriptVar *c, void *userdata) {
     if ( (scIsInt("x")) ) {
       scReturnInt( F_RNG( scGetInt("x"), scGetInt("a"), scGetInt("b") ) );
@@ -850,34 +851,34 @@ void js_require(CScriptVar *v, void *userdata) {
   UsrData *data = (UsrData*)userdata;
   CTinyJS *js=data->js;
   JSTimer *timer=data->timer;
-#ifdef CDINOJS  
+#ifdef CDINOJS
   SMessageProc *proc=data->proc;
 #endif
 
   String name=v->getParameter("name")->getString();
 
   //Serial.println("name:"+name);
-  
+
   if(name=="Object")
   {
     js->addNative(F("function Object.dump()"), scObjectDump, 0);
     js->addNative(F("function Object.clone()"), scObjectClone, 0);
-#ifdef CDINOJS    
+#ifdef CDINOJS
   }else if(name=="Cloudino")
   {
     js->addNative(F("function Cloudino.localPost(topic,data,ip)"), scCloudinoLocalPost, proc);
     js->addNative(F("function Cloudino.localBCPost(topic,data)"), scCloudinoLocalPost, proc);
     js->addNative(F("function Cloudino.post(topic,data)"), scCloudinoPost, proc);
     js->addNative(F("function Cloudino.print(text)"), js_print, proc);
-    js->addNative(F("function Cloudino.dump()"), js_dump, data);    
-    //js->addNative(F("function Cloudino.on(topic, funct)"), scCloudinoOn, proc); 
-    js->execute(F("Cloudino._tp='';Cloudino._msg='';Cloudino._on={};Cloudino.on=function (topic, funct){Cloudino._on[topic]=funct;};"));   
-    js->execute(F("Cloudino._onLocal={};Cloudino.onLocal=function (topic, funct){Cloudino._onLocal[topic]=funct;};"));    
-#endif    
+    js->addNative(F("function Cloudino.dump()"), js_dump, data);
+    //js->addNative(F("function Cloudino.on(topic, funct)"), scCloudinoOn, proc);
+    js->execute(F("Cloudino._tp='';Cloudino._msg='';Cloudino._on={};Cloudino.on=function (topic, funct){Cloudino._on[topic]=funct;};"));
+    js->execute(F("Cloudino._onLocal={};Cloudino.onLocal=function (topic, funct){Cloudino._onLocal[topic]=funct;};"));
+#endif
   }else if(name=="Rand")
   {
     js->addNative(F("function Math.rand()"), scMathRand, 0);
-    js->addNative(F("function Math.randInt(min, max)"), scMathRandInt, 0);    
+    js->addNative(F("function Math.randInt(min, max)"), scMathRandInt, 0);
   }else if(name=="String")
   {
     //js->addNative("function charToInt(ch)", scCharToInt, 0); //  convert a character to an int - get its value
@@ -887,7 +888,7 @@ void js_require(CScriptVar *v, void *userdata) {
     js->addNative(F("function String.charAt(pos)"), scStringCharAt, 0);
     js->addNative(F("function String.charCodeAt(pos)"), scStringCharCodeAt, 0);
     js->addNative(F("function String.fromCharCode(char)"), scStringFromCharCode, 0);
-    js->addNative(F("function String.split(separator)"), scStringSplit, 0);    
+    js->addNative(F("function String.split(separator)"), scStringSplit, 0);
 //  }else if(name=="Integer")
 //  {
 //    js->addNative(F("function Integer.parseInt(str)"), scIntegerParseInt, 0); // string to int
@@ -911,7 +912,7 @@ void js_require(CScriptVar *v, void *userdata) {
     js->addNative(F("function setInterval(funct,time_ms)"), js_setInterval, timer);
     js->addNative(F("function clearInterval(id)"), js_clearTimer, timer);
     js->addNative(F("function setTimeout(funct,time_ms)"), js_setTimeout, timer);
-    js->execute(F("clearTimeout=clearInterval;"));        
+    js->execute(F("clearTimeout=clearInterval;"));
   }else if(name=="JSON")
   {
     js->addNative(F("function JSON.stringify(obj)"), scJSONStringify, 0); // convert to JSON. replacer is ignored at the moment
@@ -921,19 +922,19 @@ void js_require(CScriptVar *v, void *userdata) {
   }else if(name=="HCSR04")
   {
     js->addNative(F("function HCSR04.read(tpin,hpin)"), scHCSR04Read, js); // Get DHT11 Values
-#ifdef RCSWITCH_SUPPORT    
+#ifdef RCSWITCH_SUPPORT
   }else if(name=="RCSwitch")
   {
-    js->addNative(F("function RCSwitch.enableTransmit(protocol,pin,pulseLength,repeat)"), scRCSwitchEnableTransmit, js); 
-    js->addNative(F("function RCSwitch.enableReceive(pin)"), scRCSwitchEnableReceive, js); 
-    js->addNative(F("function RCSwitch.send(code)"), scRCSwitchSend, js); 
-    js->addNative(F("function RCSwitch.receive()"), scRCSwitchReceive, js);     
+    js->addNative(F("function RCSwitch.enableTransmit(protocol,pin,pulseLength,repeat)"), scRCSwitchEnableTransmit, js);
+    js->addNative(F("function RCSwitch.enableReceive(pin)"), scRCSwitchEnableReceive, js);
+    js->addNative(F("function RCSwitch.send(code)"), scRCSwitchSend, js);
+    js->addNative(F("function RCSwitch.receive()"), scRCSwitchReceive, js);
 #endif
   }else if(name=="HTTP")
   {
-#ifdef HTTPS_SUPPORT    
+#ifdef HTTPS_SUPPORT
     js->addNative(F("function HTTP.sendSSL(host,port,content)"), scHTTPSSend, js); // Get DHT11 Values
-#endif    
+#endif
     js->addNative(F("function HTTP.send(host,port,content)"), scHTTPSend, js); // Get http contect
     js->addNative(F("function HTTP.get(url)"), scHTTPURL, js); // Get http contet
   }else if(name=="Math")
@@ -944,9 +945,9 @@ void js_require(CScriptVar *v, void *userdata) {
     js->addNative(F("function Math.max(a,b)"), scMathMax, 0);
     //js->addNative(F("function Math.range(x,a,b)"), scMathRange, 0);
     //js->addNative(F("function Math.sign(a)"), scMathSign, 0);
-    
+
     js->addNative(F("function Math.PI()"), scMathPI, 0);
-/*    
+/*
     js->addNative(F("function Math.toDegrees(a)"), scMathToDegrees, 0);
     js->addNative(F("function Math.toRadians(a)"), scMathToRadians, 0);
     js->addNative(F("function Math.sin(a)"), scMathSin, 0);
@@ -954,26 +955,26 @@ void js_require(CScriptVar *v, void *userdata) {
     js->addNative(F("function Math.tan(a)"), scMathTan, 0);
     js->addNative(F("function Math.asin(a)"), scMathASin, 0);
     js->addNative(F("function Math.acos(a)"), scMathACos, 0);
-    js->addNative(F("function Math.atan(a)"), scMathATan, 0);        
-       
+    js->addNative(F("function Math.atan(a)"), scMathATan, 0);
+
     js->addNative(F("function Math.E()"), scMathE, 0);
     js->addNative(F("function Math.log(a)"), scMathLog, 0);
     js->addNative(F("function Math.log10(a)"), scMathLog10, 0);
     js->addNative(F("function Math.exp(a)"), scMathExp, 0);
     js->addNative(F("function Math.pow(a,b)"), scMathPow, 0);
-*/    
-    js->addNative(F("function Math.sqrt(a)"), scMathSqrt, 0); 
+*/
+    js->addNative(F("function Math.sqrt(a)"), scMathSqrt, 0);
   }
-  
+
 }
 
-void addDefaulFunct(UsrData *data) 
+void addDefaulFunct(UsrData *data)
 {
   CTinyJS *js=data->js;
   //JSTimer *timer=data->timer;
-  
+
   //DEFAULT
-  js->addNative(F("function print(text)"), js_print, 0);  
+  js->addNative(F("function print(text)"), js_print, 0);
   //js->addNative(F("function dump()"), js_dump, js);
   js->addNative(F("function reset()"), js_reset, data);
   js->addNative(F("function restart()"), js_restart, 0);
@@ -981,9 +982,9 @@ void addDefaulFunct(UsrData *data)
   js->addNative(F("function parseFloat(str)"), scDoubleParseFloat, 0); // string to float
   //js->addNative(F("function exec(jsCode)"), scExec, js); // execute the given code
   js->addNative(F("function eval(jsCode)"), scEval, js); // execute the given string (an expression) and return the result
-    // JSON.parse is left out as you can (unsafely!) use eval instead    
+    // JSON.parse is left out as you can (unsafely!) use eval instead
   //js->addNative(F("function trace()"), scTrace, js);
-  js->addNative(F("function require(name)"), js_require, data); 
+  js->addNative(F("function require(name)"), js_require, data);
 }
 
 void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
@@ -992,28 +993,28 @@ void js_reset(CScriptVar *v __attribute__((unused)), void *userdata) {
   JSTimer *timer=data->timer;
 #ifdef CDINOJS
   SMessageProc *proc=data->proc;
-#endif  
+#endif
   js->reset();
   timer->clear();
-#ifdef CDINOJS  
+#ifdef CDINOJS
   proc->clear();
-#endif  
+#endif
   addDefaulFunct(data);
 }
 
 // ----------------------------------------------- Register Functions
 #ifdef CDINOJS
 void registerFunctions(CTinyJS *js, JSTimer *timer, SMessageProc *proc) {
-#endif  
+#endif
 #ifndef CDINOJS
 void registerFunctions(CTinyJS *js, JSTimer *timer) {
 #endif
-  //Serial.begin(57600); 
+  //Serial.begin(57600);
   UsrData *data=new UsrData();
   data->js=js;
   data->timer=timer;
-#ifdef CDINOJS  
+#ifdef CDINOJS
   data->proc=proc;
-#endif  
+#endif
   addDefaulFunct(data);
 }

@@ -4,10 +4,11 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * 
+ * (https://github.com/gfwilliams/tiny-js)
+ *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
- * Nov 2015 
- * 
+ * Nov 2015
+ *
  * Copyright (C) 2009 Pur3 Ltd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -29,22 +30,24 @@
  * SOFTWARE.
  */
 
-#ifndef TINYJS_H
-#define TINYJS_H
+#ifndef TinyJS_h
+#define TinyJS_h
 
 #define CDINOJS
 
 #ifndef CDINOJS
-#include <Arduino.h> 
+#include <Arduino.h>
 #endif
 
 #ifdef CDINOJS
-#include "src/SMessageProc.h"
+#include "SMessageProc.h"
 #include <WiFiUdp.h>
+extern WiFiUDP udp;
 #endif
 
-// If defined, this keeps a note of all calls and where from in memory. This is slower, but good for debugging
-//#define TINYJS_CALL_STACK
+// If defined, this keeps a note of all calls and where from in memory.
+// This is slower, but good for debugging
+// #define TINYJS_CALL_STACK
 
 #define TRACE_OBJ Serial
 #define STD_VECTOR
@@ -194,7 +197,7 @@ public:
       return d_data[index];
     }
 
-    void erase(unsigned int index) 
+    void erase(unsigned int index)
     {
       for (unsigned int i = index; i < d_size; ++i){
         d_data[i] = d_data[i+1];
@@ -213,7 +216,7 @@ public:
     void pop_back()
     {
         d_size--;
-    }; // Adds new value. If needed, allocates more space    
+    }; // Adds new value. If needed, allocates more space
 
     void clear() //here
     {
@@ -440,7 +443,7 @@ public:
     void trace();
 
     //bool functionCall(CScriptVar *function);
-    //void invokeFunction(String funct, String param);    
+    //void invokeFunction(String funct, String param);
 
     CScriptVar *root;   /// root of symbol table
 
@@ -457,7 +460,7 @@ public:
             root->removeLink(c);
           }
           c = t;
-      }    
+      }
     }
 
 private:
@@ -493,9 +496,7 @@ private:
     CScriptVarLink *findInParentClasses(CScriptVar *object, const String &name);
 };
 
-#ifdef CDINOJS
-extern WiFiUDP udp;
-#endif
+#include "TinyJS/Functions.h"
 
-#endif
+#endif  // TinyJS_h
 

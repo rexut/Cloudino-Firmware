@@ -20,8 +20,7 @@
 #endif
 
 #ifdef JS_SUPPORT
-#include "TinyJS.h"
-#include "TinyJS_Functions.h"
+#include "src/TinyJS.h"
 #include "src/JSTimer.h"
 CTinyJS *js = new CTinyJS();
 JSTimer *timer= new JSTimer();

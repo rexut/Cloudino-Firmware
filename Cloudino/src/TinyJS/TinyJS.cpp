@@ -4,10 +4,11 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * 
+ * (https://github.com/gfwilliams/tiny-js)
+ *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
- * Nov 2015 
- * 
+ * Nov 2015
+ *
  * Copyright (C) 2009 Pur3 Ltd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -28,22 +29,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 /*
     NOTE:
-          Constructing an array with an initial length 'Array(5)' doesn't work
-          Recursive loops of data such as a.foo = a; fail to be garbage collected
-          length variable cannot be set
-          The postfix increment operator returns the current value, not the previous as it should.
-          There is no prefix increment operator
-          Arrays are implemented as a linked list - hence a lookup time is O(n)
+          Constructing an array with an initial length 'Array(5)' doesn't
+          work. Recursive loops of data such as a.foo = a; fail to be garbage
+          collected length variable cannot be set. The postfix increment
+          operator returns the current value, not the previous as it should.
+          There is no prefix increment operator. Arrays are implemented as a
+          linked list - hence a lookup time is O(n)
 
     TODO:
-          Utility va-args style function in TinyJS for executing a function directly
-          Merge the parsing of expressions/statements so eval("statement") works like we'd expect.
-          Move 'shift' implementation into mathsOp
+          Utility va-args style function in TinyJS for executing a function
+          directly. Merge the parsing of expressions/statements so
+          eval("statement") works like we'd expect. Move 'shift'
+          implementation into mathsOp.
 
  */
-#include "TinyJS.h"
+
+#include "../TinyJS.h"
 /* Frees the given link IF it isn't owned by anything else */
 #define CLEAN(x) { CScriptVarLink *__v = x; if (__v && !__v->owned) { delete __v; } }
 /* Create a LINK to point to VAR and free the old link.
@@ -56,7 +60,7 @@
 #define _strdup strdup
 #endif
 
-// ----------------------------------------------------------------------------------- Memory Debug
+// --------------------------------------------------------------- Memory Debug
 
 #define NPOS -1
 
@@ -72,7 +76,7 @@ void TRACE_F(const char *format, ...)
 #ifdef CDINOJS
     proc.logHandler(temp);
 #endif
-#ifndef CDINOJS    
+#ifndef CDINOJS
     TRACE_OBJ.print(temp);
 #endif
     va_end(arg);
@@ -83,12 +87,12 @@ void TRACE(String txt)
 #ifdef CDINOJS
     proc.logHandler(txt);
 #endif
-#ifndef CDINOJS    
+#ifndef CDINOJS
     TRACE_OBJ.print(txt);
 #endif
 }
 
-// ----------------------------------------------------------------------------------- Utils
+// --------------------------------------------------------------- Utils
 bool isWhitespace(char ch) {
     return (ch==' ') || (ch=='\t') || (ch=='\n') || (ch=='\r');
 }
@@ -163,13 +167,13 @@ bool isAlphaNum(const String &str) {
     return true;
 }
 
-// ----------------------------------------------------------------------------------- CSCRIPTEXCEPTION
+// --------------------------------------------------------------- CSCRIPTEXCEPTION
 
 CScriptException::CScriptException(const String &exceptionText) {
     text = exceptionText;
 }
 
-// ----------------------------------------------------------------------------------- CSCRIPTLEX
+// --------------------------------------------------------------- CSCRIPTLEX
 
 CScriptLex::CScriptLex(const String &input) {
     data = _strdup(input.c_str());
@@ -530,7 +534,7 @@ String CScriptLex::getPosition(int pos) {
     return buf;
 }
 
-// ----------------------------------------------------------------------------------- CSCRIPTVARLINK
+// --------------------------------------------------------------- CSCRIPTVARLINK
 
 CScriptVarLink::CScriptVarLink(CScriptVar *var, const String &name) {
     this->name = name;
@@ -575,7 +579,7 @@ void CScriptVarLink::setIntName(int n) {
     name = sIdx;
 }
 
-// ----------------------------------------------------------------------------------- CSCRIPTVAR
+// --------------------------------------------------------------- CSCRIPTVAR
 
 CScriptVar::CScriptVar() {
     refs = 0;
@@ -932,7 +936,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
                 case LEX_LEQUAL:    return new CScriptVar(da<=db);
                 case '>':     return new CScriptVar(da>db);
                 case LEX_GEQUAL:    return new CScriptVar(da>=db);
-                default: 
+                default:
                 ;
                 //throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Int datatype");
                 TRACE("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Int datatype\n");
@@ -953,7 +957,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
                 case LEX_LEQUAL:    return new CScriptVar(da<=db);
                 case '>':     return new CScriptVar(da>db);
                 case LEX_GEQUAL:    return new CScriptVar(da>=db);
-                default: 
+                default:
                 ;
                 //throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Double datatype");
             }
@@ -963,7 +967,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
       switch (op) {
            case LEX_EQUAL: return new CScriptVar(a==b);
            case LEX_NEQUAL: return new CScriptVar(a!=b);
-           default: 
+           default:
            ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Array datatype");
       }
     } else if (a->isObject()) {
@@ -971,7 +975,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
           switch (op) {
                case LEX_EQUAL: return new CScriptVar(a==b);
                case LEX_NEQUAL: return new CScriptVar(a!=b);
-               default: 
+               default:
                ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Object datatype");
           }
     } else {
@@ -986,7 +990,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
            case LEX_LEQUAL:    return new CScriptVar(da<=db);
            case '>':     return new CScriptVar(da>db);
            case LEX_GEQUAL:    return new CScriptVar(da>=db);
-           default: 
+           default:
            ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the string datatype");
        }
     }
@@ -1155,7 +1159,7 @@ int CScriptVar::getRefs() {
 }
 
 
-// ----------------------------------------------------------------------------------- CSCRIPT
+// --------------------------------------------------------------- CSCRIPT
 
 CTinyJS::CTinyJS() {
     l = 0;
@@ -1260,7 +1264,7 @@ String CTinyJS::evaluate(const String &code) {
     //return evaluateComplex(code).var->getString();
     String result;
     evaluateComplex(code).var->getJSON(result);
-    return result;    
+    return result;
 }
 
 void CTinyJS::parseFunctionArguments(CScriptVar *funcVar) {
@@ -1339,9 +1343,9 @@ void CTinyJS::invokeFunction(String funct, String param)
   Serial.println("paso");
   Serial.println(f.name);
   Serial.println(f.var->getString());
-  
+
   CScriptVar *obj = new CScriptVar(param);
-  functionCall(exec, &f, obj);      
+  functionCall(exec, &f, obj);
   Serial.println("paso2");
   delete obj;
 }
@@ -1482,9 +1486,9 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
         }
         l->match(LEX_ID);
         while (l->tk=='(' || l->tk=='.' || l->tk=='[') {
-            if (l->tk=='(') { // ------------------------------------- Function Call
+            if (l->tk=='(') { // -------------------------- Function Call
                 a = functionCall(execute, a, parent);
-            } else if (l->tk == '.') { // ------------------------------------- Record Access
+            } else if (l->tk == '.') { // ----------------- Record Access
                 l->match('.');
                 if (execute) {
                   const String &name = l->tkStr;
@@ -1507,7 +1511,7 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
                   a = child;
                 }
                 l->match(LEX_ID);
-            } else if (l->tk == '[') { // ------------------------------------- Array Access
+            } else if (l->tk == '[') { // ----------------- Array Access
                 l->match('[');
                 CScriptVarLink *index = base(execute);
                 l->match(']');
@@ -1883,7 +1887,7 @@ void CTinyJS::block(bool &execute) {
 void CTinyJS::statement(bool &execute) {
 
     //Serial.println("statement:"+String(l->tk));
-  
+
     if (l->tk==LEX_ID ||
         l->tk==LEX_INT ||
         l->tk==LEX_FLOAT ||
@@ -2111,7 +2115,7 @@ bool CTinyJS::setVariable(const String &path, const String &varData) {
         else
             var->setString(varData.c_str());
         return true;
-    }    
+    }
     else
         return false;
 }

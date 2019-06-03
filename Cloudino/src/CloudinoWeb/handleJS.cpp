@@ -9,7 +9,7 @@
 #include "../EEPROMAnything.h"
 #include "../CloudinoWeb.h"
 
-#include "../../TinyJS.h"
+#include "../TinyJS.h"
 extern CTinyJS *js;
 
 #ifdef JS_SUPPORT
