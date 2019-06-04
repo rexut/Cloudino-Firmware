@@ -615,7 +615,7 @@ void CScriptVar::removeChild(CScriptVar *child) {
             break;
         link = link->nextSibling;
     }
-    //ASSERT(link);
+    ASSERT(link);
     removeLink(link);
 }
 
@@ -896,7 +896,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
            ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the string datatype");
        }
     }
-    //ASSERT(0);
+    ASSERT(0);
     return 0;
 }
 
@@ -1076,7 +1076,7 @@ CTinyJS::CTinyJS() {
 }
 
 CTinyJS::~CTinyJS() {
-    //ASSERT(!l);
+    ASSERT(!l);
     scopes.clear();
     stringClass->unref();
     arrayClass->unref();
@@ -1302,7 +1302,7 @@ CScriptVarLink *CTinyJS::functionCall(bool &execute, CScriptVarLink *function, C
 #endif
 
     if (function->var->isNative()) {
-        //ASSERT(function->var->jsCallback);
+        ASSERT(function->var->ddata.jsCallback);
         function->var->ddata.jsCallback(functionRoot, function->var->jsCallbackUserData);
     } else {
         /* we just want to execute the block, but something could
@@ -1427,7 +1427,7 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
                   a = child;
                 }
                 CLEAN(index);
-            };// else ASSERT(0);
+            } else ASSERT(0);
         }
         return a;
     }
@@ -1765,7 +1765,7 @@ CScriptVarLink *CTinyJS::base(bool &execute) {
             } else if (op==LEX_MINUSEQUAL) {
                 CScriptVar *res = lhs->var->mathsOp(rhs->var, '-');
                 lhs->replaceWith(res);
-            };// else ASSERT(0);
+            } else ASSERT(0);
         }
         CLEAN(rhs);
     }

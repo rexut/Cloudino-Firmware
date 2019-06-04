@@ -48,6 +48,9 @@ bool isNumber(const String &str);
 bool isAlphaNum(const String &str);
 bool isIDString(const char *s);
 
+#include <assert.h>
+#define ASSERT(X) assert(X)
+
 // Frees the given link IF it isn't owned by anything else.
 #define CLEAN(x) { \
   CScriptVarLink *__v = x; \
