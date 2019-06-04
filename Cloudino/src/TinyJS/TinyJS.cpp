@@ -34,6 +34,7 @@
 
 #include "Utils.h"
 #include "Trace.h"
+#include "DbgMem.h"
 
 #define NPOS -1
 
@@ -407,6 +408,9 @@ String CScriptLex::getPosition(int pos) {
 // --------------------------------------------------------------- CSCRIPTVARLINK
 
 CScriptVarLink::CScriptVarLink(CScriptVar *var, const String &name) {
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     this->name = name;
     this->nextSibling = 0;
     this->prevSibling = 0;
@@ -416,6 +420,9 @@ CScriptVarLink::CScriptVarLink(CScriptVar *var, const String &name) {
 
 CScriptVarLink::CScriptVarLink(const CScriptVarLink &link) {
     // Copy constructor
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     this->name = link.name;
     this->nextSibling = 0;
     this->prevSibling = 0;
@@ -424,6 +431,9 @@ CScriptVarLink::CScriptVarLink(const CScriptVarLink &link) {
 }
 
 CScriptVarLink::~CScriptVarLink() {
+#if DEBUG_MEMORY
+    mark_deallocated(this);
+#endif
     var->unref();
 }
 
@@ -453,12 +463,18 @@ void CScriptVarLink::setIntName(int n) {
 
 CScriptVar::CScriptVar() {
     refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     init();
     flags = SCRIPTVAR_UNDEFINED;
 }
 
 CScriptVar::CScriptVar(const String &str) {
     refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     init();
     flags = SCRIPTVAR_STRING;
     data = str;
@@ -467,6 +483,9 @@ CScriptVar::CScriptVar(const String &str) {
 
 CScriptVar::CScriptVar(const String &varData, int varFlags) {
     refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     init();
     //if(Serial)//Serial.println("CScriptVar");
     flags = varFlags;
@@ -480,17 +499,26 @@ CScriptVar::CScriptVar(const String &varData, int varFlags) {
 
 CScriptVar::CScriptVar(double val) {
     refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     init();
     setDouble(val);
 }
 
 CScriptVar::CScriptVar(int val) {
     refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
     init();
     setInt(val);
 }
 
 CScriptVar::~CScriptVar(void) {
+#if DEBUG_MEMORY
+    mark_deallocated(this);
+#endif
     removeAllChildren();
 }
 
@@ -1054,6 +1082,10 @@ CTinyJS::~CTinyJS() {
     arrayClass->unref();
     objectClass->unref();
     root->unref();
+
+#if DEBUG_MEMORY
+    show_allocated();
+#endif
 }
 
 void CTinyJS::trace() {
