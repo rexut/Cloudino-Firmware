@@ -4,7 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * (https://github.com/gfwilliams/tiny-js)
+ * (https://github.com/gfwilliams/tiny-js - sha1:1c91498)
  *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
  * Nov 2015
@@ -30,13 +30,112 @@
  * SOFTWARE.
  */
 
+/* Version 0.1  :  (gw) First published on Google Code
+   Version 0.11 :  Making sure the 'root' variable never changes
+                   'symbol_base' added for the current base of the sybmbol table
+   Version 0.12 :  Added findChildOrCreate, changed string passing to use references
+                   Fixed broken string encoding in getJSString()
+                   Removed getInitCode and added getJSON instead
+                   Added nil
+                   Added rough JSON parsing
+                   Improved example app
+   Version 0.13 :  Added tokenEnd/tokenLastEnd to lexer to avoid parsing whitespace
+                   Ability to define functions without names
+                   Can now do "var mine = function(a,b) { ... };"
+                   Slightly better 'trace' function
+                   Added findChildOrCreateByPath function
+                   Added simple test suite
+                   Added skipping of blocks when not executing
+   Version 0.14 :  Added parsing of more number types
+                   Added parsing of string defined with '
+                   Changed nil to null as per spec, added 'undefined'
+                   Now set variables with the correct scope, and treat unknown
+                              as 'undefined' rather than failing
+                   Added proper (I hope) handling of null and undefined
+                   Added === check
+   Version 0.15 :  Fix for possible memory leaks
+   Version 0.16 :  Removal of un-needed findRecursive calls
+                   symbol_base removed and replaced with 'scopes' stack
+                   Added reference counting a proper tree structure
+                       (Allowing pass by reference)
+                   Allowed JSON output to output IDs, not strings
+                   Added get/set for array indices
+                   Changed Callbacks to include user data pointer
+                   Added some support for objects
+                   Added more Java-esque builtin functions
+   Version 0.17 :  Now we don't deepCopy the parent object of the class
+                   Added JSON.stringify and eval()
+                   Nicer JSON indenting
+                   Fixed function output in JSON
+                   Added evaluateComplex
+                   Fixed some reentrancy issues with evaluate/execute
+   Version 0.18 :  Fixed some issues with code being executed when it shouldn't
+   Version 0.19 :  Added array.length
+                   Changed '__parent' to 'prototype' to bring it more in line with javascript
+   Version 0.20 :  Added '%' operator
+   Version 0.21 :  Added array type
+                   String.length() no more - now String.length
+                   Added extra constructors to reduce confusion
+                   Fixed checks against undefined
+   Version 0.22 :  First part of ardi's changes:
+                       sprintf -> sprintf_s
+                       extra tokens parsed
+                       array memory leak fixed
+                   Fixed memory leak in evaluateComplex
+                   Fixed memory leak in FOR loops
+                   Fixed memory leak for unary minus
+   Version 0.23 :  Allowed evaluate[Complex] to take in semi-colon separated
+                     statements and then only return the value from the last one.
+                     Also checks to make sure *everything* was parsed.
+                   Ints + doubles are now stored in binary form (faster + more precise)
+   Version 0.24 :  More useful error for maths ops
+                   Don't dump everything on a match error.
+   Version 0.25 :  Better string escaping
+   Version 0.26 :  Add CScriptVar::equals
+                   Add built-in array functions
+   Version 0.27 :  Added OZLB's TinyJS.setVariable (with some tweaks)
+                   Added OZLB's Maths Functions
+   Version 0.28 :  Ternary operator
+                   Rudimentary call stack on error
+                   Added String Character functions
+                   Added shift operators
+   Version 0.29 :  Added new object via functions
+                   Fixed getString() for double on some platforms
+   Version 0.30 :  Rlyeh Mario's patch for Math Functions on VC++
+   Version 0.31 :  Add exec() to TinyJS functions
+                   Now print quoted JSON that can be read by PHP/Python parsers
+                   Fixed postfix increment operator
+   Version 0.32 :  Fixed Math.randInt on 32 bit PCs, where it was broken
+   Version 0.33 :  Fixed Memory leak + brokenness on === comparison
+
+    NOTE:
+          Constructing an array with an initial length 'Array(5)' doesn't
+          work. Recursive loops of data such as a.foo = a; fail to be garbage
+          collected length variable cannot be set. The postfix increment
+          operator returns the current value, not the previous as it should.
+          There is no prefix increment operator. Arrays are implemented as a
+          linked list - hence a lookup time is O(n)
+
+    TODO:
+          Utility va-args style function in TinyJS for executing a function
+          directly. Merge the parsing of expressions/statements so
+          eval("statement") works like we'd expect. Move 'shift'
+          implementation into mathsOp.
+
+
+ */
+
+#include <Arduino.h>  // for type definitions
+
+#include <vector>
+#include <cstdlib>
+static const size_t NPOS = -1;
+
 #include "../TinyJS.h"
 
 #include "Utils.h"
 #include "Trace.h"
 #include "DbgMem.h"
-
-#define NPOS -1
 
 // --------------------------------------------------------------- CSCRIPTEXCEPTION
 
@@ -85,9 +184,7 @@ void CScriptLex::match(int expected_tk) {
         String errorString="";
         errorString+="Got " + getTokenStr(tk) + " expected " + getTokenStr(expected_tk)
          + " at " + String(getPosition(tokenStart));
-        //throw new CScriptException(errorString);
-        TRACE(errorString);
-        //return;
+        throw new CScriptException(errorString);
     }
     getNextToken();
 }
@@ -140,7 +237,7 @@ String CScriptLex::getTokenStr(int token) {
         case LEX_R_NULL : return "null";
         case LEX_R_UNDEFINED : return "undefined";
         case LEX_R_NEW : return "new";
-        case LEX_R_DELETE : return "delete";
+        case LEX_R_DELETE : return "delete"; // CDINO-ONLY
     }
 
     String msg;
@@ -200,7 +297,7 @@ void CScriptLex::getNextToken() {
         else if (tkStr=="null") tk = LEX_R_NULL;
         else if (tkStr=="undefined") tk = LEX_R_UNDEFINED;
         else if (tkStr=="new") tk = LEX_R_NEW;
-        else if (tkStr=="delete") tk = LEX_R_DELETE;
+        else if (tkStr=="delete") tk = LEX_R_DELETE; // CDINO-ONLY
     } else if (isNumeric(currCh)) { // Numbers
         bool isHex = false;
         if (currCh=='0') { tkStr += currCh; getNextCh(); }
@@ -487,12 +584,12 @@ CScriptVar::CScriptVar(const String &varData, int varFlags) {
     mark_allocated(this);
 #endif
     init();
-    //if(Serial)//Serial.println("CScriptVar");
+    // Serial.println("CScriptVar");
     flags = varFlags;
     if (varFlags & SCRIPTVAR_INTEGER) {
-      ddata.intData = atol(varData.c_str());
+      intData = atol(varData.c_str());
     } else if (varFlags & SCRIPTVAR_DOUBLE) {
-      ddata.doubleData = strtod(varData.c_str(),0);
+      doubleData = strtod(varData.c_str(),0);
     } else
       data = varData;
 }
@@ -525,12 +622,12 @@ CScriptVar::~CScriptVar(void) {
 void CScriptVar::init() {
     firstChild = 0;
     lastChild = 0;
-    flags = 0;
-    ddata.jsCallback = 0;
+    flags = SCRIPTVAR_UNDEFINED;
+    jsCallback = 0;
     jsCallbackUserData = 0;
-    //initdata = TINYJS_BLANK_DATA;
-    //intData = 0;
-    //doubleData = 0;
+    data = TINYJS_BLANK_DATA;
+    intData = 0;
+    doubleData = 0;
 }
 
 CScriptVar *CScriptVar::getReturnVar() {
@@ -564,7 +661,7 @@ CScriptVarLink *CScriptVar::findChildOrCreate(const String &childName, int varFl
 }
 
 CScriptVarLink *CScriptVar::findChildOrCreateByPath(const String &path) {
-  int p = path.indexOf('.');
+  size_t p = path.indexOf('.');
   if (p == NPOS)
     return findChildOrCreate(path);
 
@@ -694,51 +791,42 @@ int CScriptVar::getChildren() {
 
 int CScriptVar::getInt() {
     /* strtol understands about hex and octal */
-    if (isInt()) return ddata.intData;
+    if (isInt()) return intData;
     if (isNull()) return 0;
     if (isUndefined()) return 0;
-    if (isDouble()) return (int)ddata.doubleData;
-    return 0;
-}
-
-long CScriptVar::getLong() {
-    /* strtol understands about hex and octal */
-    if (isInt()) return ddata.intData;
-    if (isNull()) return 0;
-    if (isUndefined()) return 0;
-    if (isDouble()) return (long)ddata.doubleData;
+    if (isDouble()) return (int)doubleData;
     return 0;
 }
 
 double CScriptVar::getDouble() {
-    if (isDouble()) return ddata.doubleData;
-    if (isInt()) return ddata.intData;
+    if (isDouble()) return doubleData;
+    if (isInt()) return intData;
     if (isNull()) return 0;
     if (isUndefined()) return 0;
     return 0; /* or NaN? */
 }
 
 // String encodings suitable for JavaScript.
-String _S_NULL = "null";
-String _S_UNDEFINED = "undefined";
+static const String _S_NULL = "null";
+static const String _S_UNDEFINED = "undefined";
 
 const String &CScriptVar::getString() {
     /* Because we can't return a string that is generated on demand.
-     * I should really just use char* :) */
-    //static String s_null = "null";
-    //static String s_undefined = "undefined";
+     * I should really just use char* :) - On Anrduino is it possible ? */
+    // static String s_null = "null";
+    // static String s_undefined = "undefined";
     if (isInt()) {
-      //char buffer[32];
-      //sprintf_s(buffer, sizeof(buffer), "%ld", intData);
-      //data = buffer;
-      data=String(ddata.intData);
+      // char buffer[32];
+      // sprintf_s(buffer, sizeof(buffer), "%ld", intData);
+      // data = buffer;
+      data=String(intData);
       return data;
     }
     if (isDouble()) {
       //char buffer[32];
       //sprintf_s(buffer, sizeof(buffer), "%f", doubleData);
       //data = buffer;
-      data=String(ddata.doubleData);
+      data=String(doubleData);
       return data;
     }
     if (isNull()) return _S_NULL;
@@ -749,15 +837,15 @@ const String &CScriptVar::getString() {
 
 void CScriptVar::setInt(int val) {
     flags = (flags&~SCRIPTVAR_VARTYPEMASK) | SCRIPTVAR_INTEGER;
-    ddata.intData = val;
-    //doubleData = 0;
+    intData = val;
+    doubleData = 0;
     data = TINYJS_BLANK_DATA;
 }
 
 void CScriptVar::setDouble(double val) {
     flags = (flags&~SCRIPTVAR_VARTYPEMASK) | SCRIPTVAR_DOUBLE;
-    ddata.doubleData = val;
-    //intData = 0;
+    doubleData = val;
+    intData = 0;
     data = TINYJS_BLANK_DATA;
 }
 
@@ -765,16 +853,16 @@ void CScriptVar::setString(const String &str) {
     // name sure it's not still a number or integer
     flags = (flags&~SCRIPTVAR_VARTYPEMASK) | SCRIPTVAR_STRING;
     data = str;
-    //intData = 0;
-    //doubleData = 0;
+    intData = 0;
+    doubleData = 0;
 }
 
 void CScriptVar::setUndefined() {
     // name sure it's not still a number or integer
     flags = (flags&~SCRIPTVAR_VARTYPEMASK) | SCRIPTVAR_UNDEFINED;
     data = TINYJS_BLANK_DATA;
-    ddata.intData = 0;
-    //doubleData = 0;
+    intData = 0;
+    doubleData = 0;
     removeAllChildren();
 }
 
@@ -782,8 +870,8 @@ void CScriptVar::setArray() {
     // name sure it's not still a number or integer
     flags = (flags&~SCRIPTVAR_VARTYPEMASK) | SCRIPTVAR_ARRAY;
     data = TINYJS_BLANK_DATA;
-    ddata.intData = 0;
-    //doubleData = 0;
+    intData = 0;
+    doubleData = 0;
     removeAllChildren();
 }
 
@@ -838,11 +926,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
                 case LEX_LEQUAL:    return new CScriptVar(da<=db);
                 case '>':     return new CScriptVar(da>db);
                 case LEX_GEQUAL:    return new CScriptVar(da>=db);
-                default:
-                ;
-                //throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Int datatype");
-                TRACE("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Int datatype\n");
-                return NULL;
+                default: throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Int datatype");
             }
         } else {
             // use doubles
@@ -859,9 +943,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
                 case LEX_LEQUAL:    return new CScriptVar(da<=db);
                 case '>':     return new CScriptVar(da>db);
                 case LEX_GEQUAL:    return new CScriptVar(da>=db);
-                default:
-                ;
-                //throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Double datatype");
+                default: throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Double datatype");
             }
         }
     } else if (a->isArray()) {
@@ -869,16 +951,14 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
       switch (op) {
            case LEX_EQUAL: return new CScriptVar(a==b);
            case LEX_NEQUAL: return new CScriptVar(a!=b);
-           default:
-           ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Array datatype");
+           default: throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Array datatype");
       }
     } else if (a->isObject()) {
           /* Just check pointers */
           switch (op) {
                case LEX_EQUAL: return new CScriptVar(a==b);
                case LEX_NEQUAL: return new CScriptVar(a!=b);
-               default:
-               ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Object datatype");
+               default: throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the Object datatype");
           }
     } else {
        String da = a->getString();
@@ -892,8 +972,7 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
            case LEX_LEQUAL:    return new CScriptVar(da<=db);
            case '>':     return new CScriptVar(da>db);
            case LEX_GEQUAL:    return new CScriptVar(da>=db);
-           default:
-           ;//throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the string datatype");
+           default: throw new CScriptException("Operation "+CScriptLex::getTokenStr(op)+" not supported on the string datatype");
        }
     }
     ASSERT(0);
@@ -901,10 +980,9 @@ CScriptVar *CScriptVar::mathsOp(CScriptVar *b, int op) {
 }
 
 void CScriptVar::copySimpleData(CScriptVar *val) {
-    ddata=val->ddata;
     data = val->data;
-    //intData = val->intData;
-    //doubleData = val->doubleData;
+    intData = val->intData;
+    doubleData = val->doubleData;
     flags = (flags & ~SCRIPTVAR_VARTYPEMASK) | (val->flags & SCRIPTVAR_VARTYPEMASK);
 }
 
@@ -1040,7 +1118,7 @@ void CScriptVar::getJSON(String &destination, const String linePrefix) {
 
 
 void CScriptVar::setCallback(JSCallback callback, void *userdata) {
-    ddata.jsCallback = callback;
+    jsCallback = callback;
     jsCallbackUserData = userdata;
 }
 
@@ -1101,10 +1179,10 @@ void CTinyJS::execute(const String &code) {
 #endif
     scopes.clear();
     scopes.push_back(root);
-    //try {
+    try {
         bool execute = true;
         while (l->tk) statement(execute);
-    /*} catch (CScriptException *e) {
+    } catch (CScriptException *e) {
         String msg="";
         msg+="Error " + e->text;
 #ifdef TINYJS_CALL_STACK
@@ -1116,7 +1194,7 @@ void CTinyJS::execute(const String &code) {
         l = oldLex;
 
         throw new CScriptException(msg);
-    }*/
+    }
     delete l;
     l = oldLex;
     scopes = oldScopes;
@@ -1133,14 +1211,14 @@ CScriptVarLink CTinyJS::evaluateComplex(const String &code) {
     scopes.clear();
     scopes.push_back(root);
     CScriptVarLink *v = 0;
-    //try {
+    try {
         bool execute = true;
         do {
           CLEAN(v);
           v = base(execute);
           if (l->tk!=LEX_EOF) l->match(';');
         } while (l->tk!=LEX_EOF);
-    /*} catch (CScriptException *e) {
+    } catch (CScriptException *e) {
       String msg="";
       msg+="Error " + e->text;
 #ifdef TINYJS_CALL_STACK
@@ -1152,7 +1230,7 @@ CScriptVarLink CTinyJS::evaluateComplex(const String &code) {
       l = oldLex;
 
         throw new CScriptException(msg);
-    }*/
+    }
     delete l;
     l = oldLex;
     scopes = oldScopes;
@@ -1167,7 +1245,7 @@ CScriptVarLink CTinyJS::evaluateComplex(const String &code) {
 }
 
 String CTinyJS::evaluate(const String &code) {
-    //return evaluateComplex(code).var->getString();
+    // CDINO-ONLY off: return evaluateComplex(code).var->getString();
     String result;
     evaluateComplex(code).var->getJSON(result);
     return result;
@@ -1230,33 +1308,6 @@ CScriptVarLink *CTinyJS::parseFunctionDefinition() {
   return funcVar;
 }
 
-/*
-bool CTinyJS::functionCall(CScriptVar *function)
-{
-    bool exec=true;
-    CScriptVarLink *link = new CScriptVarLink(function);
-    functionCall(exec, link, 0);
-    delete link;
-    return exec;
-}
-*/
-/*
-void CTinyJS::invokeFunction(String funct, String param)
-{
-  Serial.println("invokeFunction:"+funct+" p:"+param);
-  bool exec=true;
-  CScriptVarLink f = evaluateComplex(funct);
-  Serial.println("paso");
-  Serial.println(f.name);
-  Serial.println(f.var->getString());
-
-  CScriptVar *obj = new CScriptVar(param);
-  functionCall(exec, &f, obj);
-  Serial.println("paso2");
-  delete obj;
-}
-*/
-
 /** Handle a function call (assumes we've parsed the function name and we're
  * on the start bracket). 'parent' is the object that contains this method,
  * if there was one (otherwise it's just a normnal function).
@@ -1266,7 +1317,7 @@ CScriptVarLink *CTinyJS::functionCall(bool &execute, CScriptVarLink *function, C
     if (!function->var->isFunction()) {
         String errorMsg = "Expecting '";
         errorMsg = errorMsg + function->name + "' to be a function";
-        //throw new CScriptException(errorMsg.c_str());
+        throw new CScriptException(errorMsg.c_str());
     }
     l->match('(');
     // create a new symbol table entry for execution of this function
@@ -1302,28 +1353,28 @@ CScriptVarLink *CTinyJS::functionCall(bool &execute, CScriptVarLink *function, C
 #endif
 
     if (function->var->isNative()) {
-        ASSERT(function->var->ddata.jsCallback);
-        function->var->ddata.jsCallback(functionRoot, function->var->jsCallbackUserData);
+        ASSERT(function->var->jsCallback);
+        function->var->jsCallback(functionRoot, function->var->jsCallbackUserData);
     } else {
         /* we just want to execute the block, but something could
          * have messed up and left us with the wrong ScriptLex, so
          * we want to be careful here... */
-        //CScriptException *exception = 0;
+        CScriptException *exception = 0;
         CScriptLex *oldLex = l;
         CScriptLex *newLex = new CScriptLex(function->var->getString());
         l = newLex;
-        //try {
+        try {
           block(execute);
           // because return will probably have called this, and set execute to false
           execute = true;
-        /*} catch (CScriptException *e) {
+        } catch (CScriptException *e) {
           exception = e;
-        }*/
+        }
         delete newLex;
         l = oldLex;
 
-        //if (exception)
-        //  throw exception;
+        if (exception)
+          throw exception;
     }
 #ifdef TINYJS_CALL_STACK
     if (!call_stack.empty()) call_stack.pop_back();
@@ -1356,7 +1407,7 @@ CScriptVarLink *CTinyJS::functionCall(bool &execute, CScriptVarLink *function, C
 }
 
 CScriptVarLink *CTinyJS::factor(bool &execute) {
-    //Serial.println("factor");
+    // Serial.println("factor");
     if (l->tk=='(') {
         l->match('(');
         CScriptVarLink *a = base(execute);
@@ -1432,11 +1483,12 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
         return a;
     }
     if (l->tk==LEX_INT || l->tk==LEX_FLOAT) {
-        //Serial.println("number:"+l->tkStr);
-        CScriptVar *a = new CScriptVar(l->tkStr, ((l->tk==LEX_INT)?SCRIPTVAR_INTEGER:SCRIPTVAR_DOUBLE));
-        //Serial.println("CScriptVar");
+        // Serial.println("number:"+l->tkStr);
+        CScriptVar *a = new CScriptVar(l->tkStr,
+            ((l->tk==LEX_INT)?SCRIPTVAR_INTEGER:SCRIPTVAR_DOUBLE));
+        // Serial.println("CScriptVar");
         l->match(l->tk);
-        //Serial.println("match");
+        // Serial.println("match");
         return new CScriptVarLink(a);
     }
     if (l->tk==LEX_STR) {
@@ -1489,14 +1541,14 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
     }
     if (l->tk==LEX_R_FUNCTION) {
       CScriptVarLink *funcVar = parseFunctionDefinition();
-      if (funcVar->name != TINYJS_TEMP_NAME)
-      {
-          //Serial.println(scopes.size());
-          //TODO:Validar asignacion de funciones nombradas
-          //TRACE("Functions not defined at statement-level are not meant to have a name");
+        if (funcVar->name != TINYJS_TEMP_NAME)
+        {
+          // Serial.println(scopes.size());
+          TRACE("Functions not defined at statement-level are not meant to have a name");
+          // TODO: Validate assignment of named functions.
           scopes.back()->addChildNoDup(funcVar->name, funcVar->var);
-      }
-      return funcVar;
+        }
+        return funcVar;
     }
     if (l->tk==LEX_R_NEW) {
       // new -> create a new object
@@ -1529,26 +1581,27 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
         }
       }
     }
+    // CDINO-ONLY
     if (l->tk==LEX_R_DELETE) {
-      // new -> create a new object
+      // delete -> removes a property from an object
       l->match(LEX_R_DELETE);
       const String &className = l->tkStr;
       if (execute) {
-        //Serial.println(className);
+        // Serial.println(className);
         CScriptVarLink *objClassOrFunc = findInScopes(className);
         if (!objClassOrFunc) {
           TRACE_F("%s is not a valid class name", className.c_str());
           return 0;
         }
-        //Serial.println(objClassOrFunc->name);
+        // Serial.println(objClassOrFunc->name);
         l->match(LEX_ID);
         objClassOrFunc->var->removeAllChildren();
-        //objClassOrFunc->var->unref();
+        // objClassOrFunc->var->unref();
         objClassOrFunc->replaceWith(new CScriptVar());
-        //delete objClassOrFunc->var;
-        //objClassOrFunc->prevSibling->nextSibling=objClassOrFunc->nextSibling;
-        //objClassOrFunc->nextSibling->prevSibling=objClassOrFunc->prevSibling;
-        //delete objClassOrFunc;
+        // delete objClassOrFunc->var;
+        // objClassOrFunc->prevSibling->nextSibling=objClassOrFunc->nextSibling;
+        // objClassOrFunc->nextSibling->prevSibling=objClassOrFunc->prevSibling;
+        // delete objClassOrFunc;
         return 0;
       } else {
         l->match(LEX_ID);
@@ -1560,7 +1613,7 @@ CScriptVarLink *CTinyJS::factor(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::unary(bool &execute) {
-    //Serial.println("unary");
+    // Serial.println("unary");
     CScriptVarLink *a;
     if (l->tk=='!') {
         l->match('!'); // binary not
@@ -1576,7 +1629,7 @@ CScriptVarLink *CTinyJS::unary(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::term(bool &execute) {
-    //Serial.println("term");
+    // Serial.println("term");
     CScriptVarLink *a = unary(execute);
     while (l->tk=='*' || l->tk=='/' || l->tk=='%') {
         int op = l->tk;
@@ -1592,7 +1645,7 @@ CScriptVarLink *CTinyJS::term(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::expression(bool &execute) {
-    //Serial.println("ternary");
+    // Serial.println("ternary");
     bool negate = false;
     if (l->tk=='-') {
         l->match('-');
@@ -1633,7 +1686,7 @@ CScriptVarLink *CTinyJS::expression(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::shift(bool &execute) {
-  //Serial.println("shift");
+  // Serial.println("shift");
   CScriptVarLink *a = expression(execute);
   if (l->tk==LEX_LSHIFT || l->tk==LEX_RSHIFT || l->tk==LEX_RSHIFTUNSIGNED) {
     int op = l->tk;
@@ -1651,7 +1704,7 @@ CScriptVarLink *CTinyJS::shift(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::condition(bool &execute) {
-    //Serial.println("condition");
+    // Serial.println("condition");
     CScriptVarLink *a = shift(execute);
     CScriptVarLink *b;
     while (l->tk==LEX_EQUAL || l->tk==LEX_NEQUAL ||
@@ -1671,7 +1724,7 @@ CScriptVarLink *CTinyJS::condition(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::logic(bool &execute) {
-    //Serial.println("login");
+    // Serial.println("login");
     CScriptVarLink *a = condition(execute);
     CScriptVarLink *b;
     while (l->tk=='&' || l->tk=='|' || l->tk=='^' || l->tk==LEX_ANDAND || l->tk==LEX_OROR) {
@@ -1709,7 +1762,7 @@ CScriptVarLink *CTinyJS::logic(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::ternary(bool &execute) {
-  //Serial.println("ternary");
+  // Serial.println("ternary");
   CScriptVarLink *lhs = logic(execute);
   bool noexec = false;
   if (l->tk=='?') {
@@ -1738,9 +1791,8 @@ CScriptVarLink *CTinyJS::ternary(bool &execute) {
 }
 
 CScriptVarLink *CTinyJS::base(bool &execute) {
-    //Serial.println("base:"+String(l->tk));
+    // Serial.println("base:"+String(l->tk));
     CScriptVarLink *lhs = ternary(execute);
-    //Serial.println("ternary");
     if (l->tk=='=' || l->tk==LEX_PLUSEQUAL || l->tk==LEX_MINUSEQUAL) {
         /* If we're assigning to this and we don't have a parent,
          * add it to the symbol table root as per JavaScript. */
@@ -1791,31 +1843,29 @@ void CTinyJS::block(bool &execute) {
 }
 
 void CTinyJS::statement(bool &execute) {
-
-    //Serial.println("statement:"+String(l->tk));
-
+    // Serial.println("statement:"+String(l->tk));
     if (l->tk==LEX_ID ||
         l->tk==LEX_INT ||
         l->tk==LEX_FLOAT ||
         l->tk==LEX_STR ||
         l->tk=='-') {
         /* Execute a simple statement that only contains basic arithmetic... */
-        //Serial.println("Execute a simple statement that only contains basic arithmetic...");
+        // Serial.println("Execute a simple statement that only contains basic arithmetic...");
         CLEAN(base(execute));
         l->match(';');
     } else if (l->tk=='{') {
         /* A block of code */
-        //Serial.println("A block of code");
+        // Serial.println("A block of code");
         block(execute);
     } else if (l->tk==';') {
         /* Empty statement - to allow things like ;;; */
-        //Serial.println("Empty statement - to allow things like");
+        // Serial.println("Empty statement - to allow things like");
         l->match(';');
     } else if (l->tk==LEX_R_VAR) {
         /* variable creation. TODO - we need a better way of parsing the left
          * hand side. Maybe just have a flag called can_create_var that we
          * set and then we parse as if we're doing a normal equals.*/
-        //Serial.println("variable creation");
+        // Serial.println("variable creation");
         l->match(LEX_R_VAR);
         while (l->tk != ';') {
           CScriptVarLink *a = 0;
@@ -1823,7 +1873,7 @@ void CTinyJS::statement(bool &execute) {
             a = scopes.back()->findChildOrCreate(l->tkStr);
           l->match(LEX_ID);
           // now do stuff defined with dots
-          //Serial.println("now do stuff defined with dots");
+          // Serial.println("now do stuff defined with dots");
           while (l->tk == '.') {
               l->match('.');
               if (execute) {
@@ -1833,19 +1883,19 @@ void CTinyJS::statement(bool &execute) {
               l->match(LEX_ID);
           }
           // sort out initialiser
-          //Serial.println("sort out initialiser");
+          // Serial.println("sort out initialiser");
           if (l->tk == '=') {
               l->match('=');
-              //Serial.println("base");
+              // Serial.println("base");
               CScriptVarLink *var = base(execute);
               if (execute)
                   a->replaceWith(var);
-              //Serial.println("CLEAN");
+              // Serial.println("CLEAN");
               CLEAN(var);
           }
           if (l->tk != ';')
             l->match(',');
-          //Serial.println("End variable");
+          // Serial.println("End variable");
         }
         l->match(';');
     } else if (l->tk==LEX_R_IF) {
@@ -1897,7 +1947,7 @@ void CTinyJS::statement(bool &execute) {
         if (loopCount<=0) {
             root->trace();
             TRACE_F("WHILE Loop exceeded %d iterations at %s\n", TINYJS_LOOP_MAX_ITERATIONS, l->getPosition().c_str());
-            //throw new CScriptException("LOOP_ERROR");
+            throw new CScriptException("LOOP_ERROR");
         }
     } else if (l->tk==LEX_R_FOR) {
         l->match(LEX_R_FOR);
@@ -1949,7 +1999,7 @@ void CTinyJS::statement(bool &execute) {
         if (loopCount<=0) {
             root->trace();
             TRACE_F("FOR Loop exceeded %d iterations at %s\n", TINYJS_LOOP_MAX_ITERATIONS, l->getPosition().c_str());
-            //throw new CScriptException("LOOP_ERROR");
+            throw new CScriptException("LOOP_ERROR");
         }
     } else if (l->tk==LEX_R_RETURN) {
         l->match(LEX_R_RETURN);
@@ -1981,20 +2031,20 @@ void CTinyJS::statement(bool &execute) {
 /// Get the given variable specified by a path (var1.var2.etc), or return 0
 CScriptVar *CTinyJS::getScriptVariable(const String &path) {
     // traverse path
-    int prevIdx = 0;
-    int thisIdx = path.indexOf('.');
+    size_t prevIdx = 0;
+    size_t thisIdx = path.indexOf('.');
     if (thisIdx == NPOS) thisIdx = path.length();
     CScriptVar *var = root;
-    //Serial.println("1:"+path+"->prevIdx:"+String(prevIdx)+" thisIdx:"+String(thisIdx));
+    // Serial.println("1:"+path+"->prevIdx:"+String(prevIdx)+" thisIdx:"+String(thisIdx));
     while (var && (unsigned int)prevIdx<path.length()) {
         String el = path.substring(prevIdx, thisIdx);
-        //Serial.println("el:"+el);
+        // Serial.println("el:"+el);
         CScriptVarLink *varl = var->findChild(el);
         var = varl?varl->var:0;
         prevIdx = thisIdx+1;
         thisIdx = path.indexOf('.', prevIdx);
         if (thisIdx == NPOS) thisIdx = path.length();
-        //Serial.println("2:"+path+"->prevIdx:"+String(prevIdx)+" thisIdx:"+String(thisIdx));
+        // Serial.println("2:"+path+"->prevIdx:"+String(prevIdx)+" thisIdx:"+String(thisIdx));
     }
     return var;
 }

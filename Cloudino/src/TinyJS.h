@@ -4,7 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * (https://github.com/gfwilliams/tiny-js)
+ * (https://github.com/gfwilliams/tiny-js - sha1:3677bae)
  *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
  * Nov 2015
@@ -33,28 +33,13 @@
 #ifndef TinyJS_h
 #define TinyJS_h
 
-/*
-    NOTE:
-          Constructing an array with an initial length 'Array(5)' doesn't
-          work. Recursive loops of data such as a.foo = a; fail to be garbage
-          collected length variable cannot be set. The postfix increment
-          operator returns the current value, not the previous as it should.
-          There is no prefix increment operator. Arrays are implemented as a
-          linked list - hence a lookup time is O(n)
+// If defined, this keeps a note of all calls and where from in memory.
+// This is slower, but good for debugging
+// #define TINYJS_CALL_STACK
 
-    TODO:
-          Utility va-args style function in TinyJS for executing a function
-          directly. Merge the parsing of expressions/statements so
-          eval("statement") works like we'd expect. Move 'shift'
-          implementation into mathsOp.
-
- */
+#include <Arduino.h>  // for type definitions
 
 #define CDINOJS
-
-#ifndef CDINOJS
-#include <Arduino.h>  // for type definitions
-#endif
 
 #ifdef CDINOJS
 #include "SMessageProc.h"
@@ -62,13 +47,10 @@
 extern WiFiUDP udp;
 #endif
 
-// If defined, this keeps a note of all calls and where from in memory.
-// This is slower, but good for debugging
-// #define TINYJS_CALL_STACK
-
 #include <vector>
 
-const int TINYJS_LOOP_MAX_ITERATIONS = 100;// 8192;     //depend of your memory 200 bytes per iteration
+// depend of your memory 200 bytes per iteration
+const int TINYJS_LOOP_MAX_ITERATIONS = 100; // orig was: 8192;
 
 enum LEX_TYPES {
     LEX_EOF = 0,
@@ -114,9 +96,9 @@ enum LEX_TYPES {
     LEX_R_NULL,
     LEX_R_UNDEFINED,
     LEX_R_NEW,
-    LEX_R_DELETE,
+    LEX_R_DELETE, // CDINO-ONLY
 
-  LEX_R_LIST_END /* always the last entry */
+	LEX_R_LIST_END /* always the last entry */
 };
 
 enum SCRIPTVAR_FLAGS {
@@ -242,7 +224,7 @@ public:
     int getChildren(); ///< Get the number of children
 
     int getInt();
-    long getLong();
+    long getLong(); // CDINO-ONLY
     bool getBool() { return getInt() != 0; }
     double getDouble();
     const String &getString();
@@ -283,21 +265,14 @@ public:
     void unref(); ///< Remove a reference, and delete this variable if required
     int getRefs(); ///< Get the number of references to this script variable
 protected:
-    String data;    ///< The contents of this variable if it is a string
-    union {
-      long intData; ///< The contents of this variable if it is an int
-      double doubleData; ///< The contents of this variable if it is a double
-      JSCallback jsCallback; ///< Callback for native functions
-    } ddata;
-/*
+    int refs; ///< The number of references held to this - used for garbage collection
+
     String data; ///< The contents of this variable if it is a string
     long intData; ///< The contents of this variable if it is an int
     double doubleData; ///< The contents of this variable if it is a double
+    int flags; ///< the flags determine the type of the variable - int/double/string/etc
     JSCallback jsCallback; ///< Callback for native functions
-*/
     void *jsCallbackUserData; ///< user data passed as second argument to native functions
-    int refs; ///< The number of references held to this - used for garbage collection
-    unsigned char flags; ///< the flags determine the type of the variable - int/double/string/etc
 
     void init(); ///< initialisation of data members
 
@@ -350,28 +325,12 @@ public:
     /// Send all variables to stdout
     void trace();
 
-    //bool functionCall(CScriptVar *function);
-    //void invokeFunction(String funct, String param);
-
     CScriptVar *root;   /// root of symbol table
 
-    void reset()
-    {
-      CScriptVarLink *c = root->firstChild;
-      while (c) {
-          CScriptVarLink *t = c->nextSibling;
-          if(c->name=="String" || c->name=="Array" || c->name=="Object")
-          {
-              c->var->removeAllChildren();
-          }else
-          {
-            root->removeLink(c);
-          }
-          c = t;
-      }
-    }
+    // CDINO-ONLY
+    void reset(); ///< Reset this engine so we can start again
 
-private:
+  private:
     CScriptLex *l;             /// current lexer
     std::vector<CScriptVar*> scopes; /// stack of scopes when parsing
 #ifdef TINYJS_CALL_STACK
@@ -381,6 +340,12 @@ private:
     CScriptVar *stringClass; /// Built in string class
     CScriptVar *objectClass; /// Built in object class
     CScriptVar *arrayClass; /// Built in array class
+
+#if 0
+    // CDINO-ONLY
+    void invokeFunction(String function, String param);
+    bool functionCall(CScriptVar *function);
+#endif
 
     // parsing - in order of precedence
     CScriptVarLink *functionCall(bool &execute, CScriptVarLink *function, CScriptVar *parent);
