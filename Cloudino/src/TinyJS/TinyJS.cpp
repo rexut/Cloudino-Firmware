@@ -125,17 +125,17 @@
 
  */
 
-#include <Arduino.h>  // for type definitions
-
-#include <vector>
-#include <cstdlib>
-static const size_t NPOS = -1;
-
 #include "../TinyJS.h"
 
 #include "Utils.h"
 #include "Trace.h"
 #include "DbgMem.h"
+
+#include <Arduino.h>  // for type definitions
+
+#include <vector>
+#include <cstdlib>
+static const size_t NPOS = -1;
 
 // --------------------------------------------------------------- CSCRIPTEXCEPTION
 

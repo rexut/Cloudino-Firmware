@@ -37,8 +37,6 @@
 // This is slower, but good for debugging
 // #define TINYJS_CALL_STACK
 
-#include <Arduino.h>  // for type definitions
-
 #define CDINOJS
 
 #ifdef CDINOJS
@@ -46,6 +44,8 @@
 #include <WiFiUdp.h>
 extern WiFiUDP udp;
 #endif
+
+#include <Arduino.h>  // for type definitions
 
 #include <vector>
 
