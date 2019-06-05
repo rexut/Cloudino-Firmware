@@ -321,7 +321,7 @@ public:
 #ifdef JS_SUPPORT    
     if(topic=="$CDINOJSCMD")
     {
-       String ret=js->evaluate(data);
+       String ret=js->evaluateToJSONResult(data);
        onMessage("$CDINOJSRSP",ret);
        return;
     }else if(topic=="$CDINOJSINIT")
