@@ -21,7 +21,7 @@ void handleJS()
     script = script.substring(1);
   }
 
-  String ret = js->evaluate(script);
+  String ret = js->evaluateToJSONResult(script);
 
   webserver.send(200, "text/html; charset=utf-8", ret);
 }
