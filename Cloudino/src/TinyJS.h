@@ -329,6 +329,7 @@ public:
 
     // CDINO-ONLY
     void reset(); ///< Reset this engine so we can start again
+    String evaluateToJSONResult(const String &code); ///< Same as evaluate() but return a JSON String.
 
   private:
     CScriptLex *l;             /// current lexer

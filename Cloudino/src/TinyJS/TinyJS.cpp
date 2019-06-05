@@ -1245,10 +1245,7 @@ CScriptVarLink CTinyJS::evaluateComplex(const String &code) {
 }
 
 String CTinyJS::evaluate(const String &code) {
-    // CDINO-ONLY off: return evaluateComplex(code).var->getString();
-    String result;
-    evaluateComplex(code).var->getJSON(result);
-    return result;
+    return evaluateComplex(code).var->getString();
 }
 
 void CTinyJS::parseFunctionArguments(CScriptVar *funcVar) {
