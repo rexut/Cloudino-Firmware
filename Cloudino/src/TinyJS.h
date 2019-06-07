@@ -37,14 +37,6 @@
 // This is slower, but good for debugging
 // #define TINYJS_CALL_STACK
 
-#define CDINOJS
-
-#ifdef CDINOJS
-#include "SMessageProc.h"
-#include <WiFiUdp.h>
-extern WiFiUDP udp;
-#endif
-
 #include <Arduino.h>  // for type definitions
 
 #include <vector>
@@ -369,8 +361,6 @@ public:
     /// Look up in any parent classes of the given object
     CScriptVarLink *findInParentClasses(CScriptVar *object, const String &name);
 };
-
-#include "TinyJS/Functions.h"
 
 #endif  // TinyJS_h
 

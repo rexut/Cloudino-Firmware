@@ -32,8 +32,11 @@
  * SOFTWARE.
  */
 
-#include "../../TinyJS.h"   // catch CDINOJS
 #include "../Trace.h"
+#include "../../TinyJS_Firmware.h"
+
+#include <cstdio>
+#include <cstdarg>
 
 void TRACE_F(const char *format, ...)
 {

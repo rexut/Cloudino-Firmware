@@ -20,10 +20,11 @@
 #endif
 
 #ifdef JS_SUPPORT
-#include "src/TinyJS.h"
 #include "src/JSTimer.h"
-CTinyJS *js = new CTinyJS();
 JSTimer *timer= new JSTimer();
+#include "src/TinyJS.h"
+#include "src/TinyJS_Firmware.h"
+CTinyJS *js = new CTinyJS();
 #endif
 
 #include "CloudConnector.h"
@@ -162,7 +163,7 @@ void setup() {
 
 #ifdef JS_SUPPORT
   timer->setGlobalCallBack(callBack);
-  registerFunctions(js,timer,&proc);
+  registerFirmware(js,timer,&proc);
   proc.onServerMessage(onPostMessage);
   proc.onLocalMessage(onLocalPostMessage);
 #endif

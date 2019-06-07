@@ -6,7 +6,7 @@
  * - Useful language functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
- * (https://github.com/gfwilliams/tiny-js)
+ * (https://github.com/gfwilliams/tiny-js - sha1:3677bae)
  *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
  * Nov 2015
@@ -36,26 +36,16 @@
 #define TinyJS_Functions_h
 
 #include "../TinyJS.h"
-#include "../JSTimer.h"
-#ifdef CDINOJS
-#include "../SMessageProc.h"
-#endif
-
-struct UsrData
-{
-  CTinyJS *js;
-  JSTimer *timer;
-#ifdef CDINOJS
-  SMessageProc *proc;
-#endif
-};
 
 /// Register useful functions with the TinyJS interpreter
-#ifdef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer, SMessageProc *proc);
-#endif
-#ifndef CDINOJS
-extern void registerFunctions(CTinyJS *tinyJS, JSTimer *timer);
-#endif
+extern void registerCodeFunctions(CTinyJS *tinyJS);
+extern void registerObjectFunctions(CTinyJS *tinyJS);
+extern void registerRandFunctions(CTinyJS *tinyJS);
+extern void registerStringFunctions(CTinyJS *tinyJS);
+extern void registerIntegerFunctions(CTinyJS *tinyJS);
+extern void registerJSONFunctions(CTinyJS *tinyJS);
+extern void registerArrayFunctions(CTinyJS *tinyJS);
+extern void registerParseFunctions(CTinyJS *tinyJS);
+extern void registerFunctions(CTinyJS *tinyJS);
 
 #endif  // TinyJS_Functions_h

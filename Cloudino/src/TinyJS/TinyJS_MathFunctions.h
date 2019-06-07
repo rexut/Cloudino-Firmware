@@ -3,15 +3,15 @@
  *
  * A single-file Javascript-alike engine
  *
- * - Common memory debug (trace) functions
+ * -  Math and Trigonometry functions
  *
- * Authored By Gordon Williams <gw@pur3.co.uk>
- * (https://github.com/gfwilliams/tiny-js)
+ * Authored By O.Z.L.B. <ozlbinfo@gmail.com>
+ * (https://github.com/gfwilliams/tiny-js - sha1:1c91498)
  *
  * Ported to ESP8266 - Arduino by Javier Solis, javier.solis@infotec.mx, softjei@gmail.com
  * Nov 2015
  *
- * Copyright (C) 2009 Pur3 Ltd
+ * Copyright (C) 2011 O.Z.L.B.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,18 +32,12 @@
  * SOFTWARE.
  */
 
-#include "../Trace.h"
-#include "../../TinyJS_Firmware.h"
+#ifndef TinyJS_MathFunctions_h
+#define TinyJS_MathFunctions_h
 
-void TRACE(String txt)
-{
+#include "../TinyJS.h"
 
-#ifdef CDINOJS
-  proc.logHandler(txt);
-#endif
+/// Register useful math. functions with the TinyJS interpreter
+extern void registerMathFunctions(CTinyJS *tinyJS);
 
-#ifndef CDINOJS
-  TRACE_OBJ.print(txt);
-#endif
-
-}
+#endif  // TinyJS_MathFunctions_h
