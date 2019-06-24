@@ -240,7 +240,7 @@ public:
 
   String getName()
   {
-    return "Cloudino";
+    return "CDINO";
   }
 
   void onMessage(String topic,String data)
